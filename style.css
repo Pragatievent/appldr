@@ -639,6 +639,146 @@ body {
     font-size: 0.9rem;
 }
 
+/* Settings Tab & Dark Mode Switch */
+.settings-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.setting-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    border: 1px solid #f1f2f6;
+}
+
+.setting-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+}
+
+.setting-info strong {
+    font-size: 0.9rem;
+    color: #2f3640;
+}
+
+.setting-info p {
+    font-size: 0.75rem;
+    color: #718093;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #d63031;
+}
+
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background: #121212 !important;
+}
+
+body.dark-mode .app-container {
+    background: #121212 !important;
+    color: #f1f2f6;
+}
+
+body.dark-mode .app-header, 
+body.dark-mode .bottom-nav, 
+body.dark-mode .card, 
+body.dark-mode .auth-form-card, 
+body.dark-mode .couple-card,
+body.dark-mode .schedule-item,
+body.dark-mode .moment-card,
+body.dark-mode .setting-card,
+body.dark-mode .add-schedule-box {
+    background: #1e1e1e !important;
+    border-color: #2d3436 !important;
+    color: #f1f2f6 !important;
+}
+
+body.dark-mode .app-header h1,
+body.dark-mode .distance-header,
+body.dark-mode .card-title,
+body.dark-mode .couple-card h3,
+body.dark-mode .schedule-container h3,
+body.dark-mode .moments-header h3,
+body.dark-mode .setting-info strong {
+    color: #ff7675 !important;
+}
+
+body.dark-mode .cities,
+body.dark-mode .event-details p,
+body.dark-mode .couple-card p,
+body.dark-mode .setting-info p {
+    color: #b2bec3 !important;
+}
+
+body.dark-mode input {
+    background: #2d3436 !important;
+    color: #fff !important;
+    border-color: #4b6584 !important;
+}
+
+body.dark-mode .task-item {
+    background: #2d3436 !important;
+    color: #f1f2f6 !important;
+}
+
+body.dark-mode .chat-bubble.received {
+    background: #2d3436 !important;
+    color: #fff !important;
+    border-color: #4b6584 !important;
+}
+
+body.dark-mode .chat-header-status {
+    background: #2d3436 !important;
+    color: #b2bec3 !important;
+}
+
 /* Bottom Navigation */
 .bottom-nav {
     height: 65px;
