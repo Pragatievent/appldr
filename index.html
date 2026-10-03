@@ -15,7 +15,7 @@
     <div class="app-container">
         
         <!-- ================= AUTH SCREEN ================= -->
-        <div id="auth-screen" class="screen active">
+        <div id="auth-screen" class="screen">
             <div class="auth-header">
                 <div class="heart-logo">❤️</div>
                 <h1>COUPLE APP</h1>
@@ -25,7 +25,7 @@
                 <h2 id="auth-title">Welcome Back</h2>
                 <div class="input-group">
                     <i class="fa-solid fa-envelope"></i>
-                    <input type="email" id="auth-email" placeholder="Your Email (must contain @)">
+                    <input type="email" id="auth-email" placeholder="Your Email">
                 </div>
                 <div class="input-group">
                     <i class="fa-solid fa-lock"></i>
@@ -39,24 +39,6 @@
             </div>
         </div>
 
-        <!-- ================= EMAIL VERIFICATION SCREEN ================= -->
-        <div id="verify-screen" class="screen">
-            <div class="auth-header">
-                <div class="heart-logo">✉️</div>
-                <h1>Verify Your Email</h1>
-                <p>We've sent a 4-digit code to your email.</p>
-            </div>
-            <div class="auth-form-card">
-                <h2>Enter Verification Code</h2>
-                <div class="input-group">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <input type="text" id="verify-code-input" placeholder="e.g. 1234" maxlength="4">
-                </div>
-                <button id="verify-submit-btn" class="primary-btn">Verify & Continue</button>
-                <p class="switch-auth">Didn't receive code? <strong id="resend-code-link" style="color: #d63031; cursor: pointer;">Resend</strong></p>
-            </div>
-        </div>
-
         <!-- ================= COUPLE CONNECTION SCREEN ================= -->
         <div id="couple-screen" class="screen">
             <div class="couple-header">
@@ -65,21 +47,21 @@
                 <p>Your private space is just one connection away.</p>
             </div>
             <div class="couple-options">
-                <button id="create-couple-btn" class="primary-btn">Create Couple</button>
+                <button id="create-couple-btn" class="primary-btn">Create Couple Space</button>
                 <div class="divider">──────── OR ────────</div>
                 <p style="font-size: 0.85rem; color: #718093;">Have your partner's code?</p>
                 <div class="input-group" style="margin-bottom: 8px;">
                     <i class="fa-solid fa-key"></i>
-                    <input type="text" id="join-code-input" placeholder="Enter Code">
+                    <input type="text" id="join-code-input" placeholder="Enter Couple Code">
                 </div>
-                <button id="join-couple-btn" class="secondary-btn" style="width: 100%;">Join Couple</button>
+                <button id="join-couple-btn" class="secondary-btn" style="width: 100%;">Join Couple Space</button>
 
                 <!-- Generated Code Box -->
                 <div id="display-code-box" class="hidden" style="background: #ffeaa7; padding: 14px; border-radius: 12px; text-align: center; margin-top: 10px;">
                     <p style="font-size: 0.8rem; color: #636e72; margin-bottom: 4px;">Your Couple Code</p>
                     <strong id="generated-code" style="font-size: 1.4rem; color: #d63031; letter-spacing: 2px;"></strong>
                     <p style="font-size: 0.75rem; color: #718093; margin: 6px 0;">Share this code with your partner ❤️</p>
-                    <button id="enter-app-from-create" class="primary-btn" style="margin-top: 8px; font-size: 0.85rem; padding: 8px;">Waiting for partner... Enter App</button>
+                    <button id="enter-app-from-create" class="primary-btn" style="margin-top: 8px; font-size: 0.85rem; padding: 8px;">Enter Cloud Space</button>
                 </div>
             </div>
         </div>
@@ -87,7 +69,6 @@
         <!-- ================= MAIN APP SCREEN ================= -->
         <div id="app-screen" class="screen">
             
-            <!-- Content Area (5 Main Tabs) -->
             <div class="app-content">
 
                 <!-- 🏠 TAB 1: HOME -->
@@ -103,15 +84,15 @@
                     <!-- Distance Card -->
                     <div class="card distance-card" id="home-distance-card">
                         <div class="distance-header">
-                            📍 <span id="home-distance-num">720 km apart</span>
+                            📍 <span id="home-distance-num">Calculated Live...</span>
                         </div>
-                        <div class="cities">Mumbai ↔ Bhopal</div>
-                        <div class="updated-time">Updated now</div>
+                        <div class="cities">Cloud GPS Sync</div>
+                        <div class="updated-time" id="gps-updated-label">Live tracking active</div>
                     </div>
 
                     <!-- Next Meet Countdown Card -->
                     <div class="card countdown-card" id="home-countdown-card">
-                        <div class="countdown-title">❤️ NEXT MEET</div>
+                        <div class="countdown-title">❤️️ NEXT MEET</div>
                         <div class="countdown-days">43 DAYS</div>
                         <div class="countdown-label">Until we meet again</div>
                     </div>
@@ -123,9 +104,7 @@
                             <button id="view-all-tasks-btn" class="text-link">View all →</button>
                         </div>
                         <ul id="home-task-preview-list" class="task-preview-list">
-                            <li class="task-item completed"><input type="checkbox" checked disabled> <span>Study 1 hour</span></li>
-                            <li class="task-item"><input type="checkbox" disabled> <span>Send me a selfie</span></li>
-                            <li class="task-item"><input type="checkbox" disabled> <span>Call me tonight ❤️</span></li>
+                            <li class="task-item"><span>Loading tasks...</span></li>
                         </ul>
                     </div>
 
@@ -141,28 +120,24 @@
                     <!-- Last Message Card -->
                     <div class="card last-message-card" id="home-last-message-btn">
                         <div class="card-title-row"><span>💬 LAST MESSAGE</span></div>
-                        <p class="last-msg-text">"Miss you already 🥹"</p>
+                        <p class="last-msg-text" id="home-last-msg-text">"Tap to chat..."</p>
                     </div>
                 </div>
 
                 <!-- 💬 TAB 2: CHAT -->
                 <div id="tab-chat" class="tab-pane">
                     <div class="chat-top-bar">
-                        <div class="chat-partner-info" id="open-partner-profile">
-                            <strong>❤️ Her</strong>
-                            <span class="online-status">● Online</span>
+                        <div class="chat-partner-info">
+                            <strong>❤️ Partner</strong>
+                            <span class="online-status">● Live Cloud Sync</span>
                         </div>
                     </div>
                     <div class="chat-messages" id="chat-messages">
-                        <div class="chat-timestamp-badge">10:21 AM</div>
-                        <div class="chat-bubble received">Heyyy ❤️</div>
-                        <div class="chat-bubble sent">Good morninggg 😭</div>
-                        <div class="chat-timestamp-badge">10:23 AM</div>
-                        <div class="chat-bubble sent">Miss you 🥹</div>
+                        <!-- Real-time messages populated via Firestore -->
                     </div>
                     <div class="chat-input-area">
                         <button class="chat-action-btn"><i class="fa-solid fa-camera"></i></button>
-                        <input type="text" id="chat-input" placeholder="Type a message...">
+                        <input type="text" id="chat-input" placeholder="Type a cloud message...">
                         <button id="send-chat-btn" class="chat-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
                     </div>
                 </div>
@@ -177,7 +152,6 @@
                         </div>
                     </div>
 
-                    <!-- Random Selfie View -->
                     <div id="subtab-pane-selfie" class="subtab-pane active">
                         <div class="card random-selfie-card">
                             <div class="random-badge">🎲 RANDOM SELFIE</div>
@@ -186,11 +160,8 @@
                         </div>
                     </div>
 
-                    <!-- Memories Grid View -->
                     <div id="subtab-pane-memories" class="subtab-pane">
                         <div class="memories-grid">
-                            <div class="memory-cell"><i class="fa-solid fa-image"></i></div>
-                            <div class="memory-cell"><i class="fa-solid fa-image"></i></div>
                             <div class="memory-cell"><i class="fa-solid fa-image"></i></div>
                             <div class="memory-cell"><i class="fa-solid fa-image"></i></div>
                             <div class="memory-cell"><i class="fa-solid fa-image"></i></div>
@@ -205,41 +176,27 @@
                         <h2>Plans</h2>
                         <button id="open-add-plan-modal" class="icon-btn"><i class="fa-solid fa-plus"></i></button>
                     </div>
-                    <div class="timeline-container">
+                    <div class="timeline-container" id="timeline-container">
                         <div class="timeline-group-label">TODAY</div>
                         <div class="timeline-card">
                             <strong>❤️ Video Call</strong>
                             <p>8:30 PM</p>
                         </div>
-
-                        <div class="timeline-group-label">OCT 08</div>
-                        <div class="timeline-card">
-                            <strong>🎮 Game Night</strong>
-                            <p>9:00 PM</p>
-                        </div>
-
-                        <div class="timeline-group-label">OCT 15</div>
-                        <div class="timeline-card">
-                            <strong>❤️️ Anniversary</strong>
-                            <p>All Day</p>
-                        </div>
                     </div>
                 </div>
 
-                <!-- ❤️ TAB 5: US (Profile & Settings) -->
+                <!-- ❤️ TAB 5: US -->
                 <div id="tab-us" class="tab-pane">
                     <div class="us-profile-header">
-                        <div class="us-heart-badge">❤️️</div>
-                        <h2>You + Her</h2>
-                        <p>Together since 12 March 2025</p>
+                        <div class="us-heart-badge">❤️</div>
+                        <h2>Cloud Couple</h2>
+                        <p id="user-email-display">Connected user</p>
                     </div>
 
                     <div class="us-menu-list">
                         <div class="us-menu-item" id="menu-our-story">📖 <span>Our Story</span> <i class="fa-solid fa-chevron-right"></i></div>
-                        <div class="us-menu-item" id="menu-memories">📸 <span>Memories</span> <i class="fa-solid fa-chevron-right"></i></div>
                         <div class="us-menu-item" id="menu-dates">🎂 <span>Important Dates</span> <i class="fa-solid fa-chevron-right"></i></div>
                         <div class="us-menu-item" id="menu-location">📍 <span>Location</span> <i class="fa-solid fa-chevron-right"></i></div>
-                        <div class="us-menu-item" id="menu-privacy">🔐 <span>Privacy</span> <i class="fa-solid fa-chevron-right"></i></div>
                         <div class="us-menu-item" id="menu-settings">⚙️ <span>Settings</span> <i class="fa-solid fa-chevron-right"></i></div>
                     </div>
 
@@ -250,7 +207,7 @@
 
             </div>
 
-            <!-- Fixed Bottom Navigation Bar (5 Items) -->
+            <!-- Bottom Navigation Bar -->
             <nav class="bottom-nav">
                 <button class="nav-item active" data-tab="home">
                     <i class="fa-solid fa-house"></i>
@@ -278,9 +235,7 @@
 
     </div>
 
-    <!-- ================= MODALS & OVERLAYS ================= -->
-
-    <!-- Tasks Modal / View -->
+    <!-- Modals -->
     <div id="tasks-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -288,82 +243,26 @@
                 <h2>Tasks</h2>
                 <button id="open-add-task-btn" class="icon-btn"><i class="fa-solid fa-plus"></i></button>
             </div>
-            <div class="task-subtabs">
-                <button class="task-subtab active" data-tasktab="forme">For Me</button>
-                <button class="task-subtab" data-tasktab="byme">By Me</button>
-            </div>
-            <div class="task-progress-banner">TODAY • 2/4 COMPLETE</div>
-            <ul id="full-task-list" class="full-task-list">
-                <li class="task-item completed"><input type="checkbox" checked> <span>Drink water</span></li>
-                <li class="task-item completed"><input type="checkbox" checked> <span>Study 1 hour</span></li>
-                <li class="task-item"><input type="checkbox"> <span>Send me a selfie</span></li>
-                <li class="task-item"><input type="checkbox"> <span>Call me tonight</span></li>
-            </ul>
+            <ul id="full-task-list" class="full-task-list"></ul>
         </div>
     </div>
 
-    <!-- Add Task Bottom Sheet Modal -->
-    <div id="add-task-sheet" class="modal-overlay hidden">
-        <div class="bottom-sheet">
-            <h3>Assign a Task ❤️</h3>
-            <div class="sheet-group">
-                <label>Task</label>
-                <input type="text" id="new-task-name" placeholder="Send me a selfie">
-            </div>
-            <div class="sheet-group">
-                <label>Due</label>
-                <select id="new-task-due"><option>Today</option><option>Tomorrow</option></select>
-            </div>
-            <div class="sheet-group">
-                <label>Reminder</label>
-                <select id="new-task-reminder"><option>8:00 PM</option><option>9:00 PM</option></select>
-            </div>
-            <button id="submit-new-task-btn" class="primary-btn" style="width: 100%; margin-top: 10px;">Assign ❤️</button>
-        </div>
-    </div>
-
-    <!-- Distance Details Modal -->
     <div id="distance-modal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
                 <button id="close-distance-modal" class="icon-btn"><i class="fa-solid fa-arrow-left"></i></button>
-                <h2>Distance</h2>
+                <h2>Cloud Distance</h2>
                 <div></div>
             </div>
             <div class="distance-detail-card">
                 <div class="big-pin">📍</div>
-                <div class="big-distance" id="modal-distance-val">720 KM</div>
-                <div class="locations-row">
-                    <div><strong>You</strong><br>Mumbai</div>
-                    <div>↔</div>
-                    <div><strong>Her</strong><br>Bhopal</div>
-                </div>
-                <hr style="border:0; border-top:1px solid #f1f2f6; margin: 20px 0;">
-                <p style="font-size: 0.8rem; color: #718093; text-align: center;">Last updated<br>Just now</p>
-                <button id="refresh-gps-btn" class="secondary-btn" style="width: 100%; margin-top: 15px;"><i class="fa-solid fa-location-crosshairs"></i> Refresh Location</button>
-                <p class="privacy-notice">🔐 Location is only shared with your partner.</p>
+                <div class="big-distance" id="modal-distance-val">Calculating...</div>
+                <button id="refresh-gps-btn" class="secondary-btn" style="width: 100%; margin-top: 15px;"><i class="fa-solid fa-location-crosshairs"></i> Sync Live GPS</button>
+                <p class="privacy-notice">🔐 Encrypted cloud location sync.</p>
             </div>
         </div>
     </div>
 
-    <!-- Notifications Modal -->
-    <div id="notifications-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button id="close-notifications-modal" class="icon-btn"><i class="fa-solid fa-arrow-left"></i></button>
-                <h2>Notifications</h2>
-                <div></div>
-            </div>
-            <div class="notifications-list">
-                <div class="notif-item">❤️ Her completed: "Study 1 hour"</div>
-                <div class="notif-item">📋 New task from Her: "Call me tonight"</div>
-                <div class="notif-item">📅 Reminder: Video Call in 15 minutes</div>
-                <div class="notif-item">📸 Her sent you a selfie</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Settings Sub-Modal (from Us tab) -->
     <div id="settings-submodal" class="modal-overlay hidden">
         <div class="modal-content">
             <div class="modal-header">
@@ -377,24 +276,13 @@
                     <span>🌙 Dark Mode</span>
                     <label class="switch"><input type="checkbox" id="dark-mode-toggle"><span class="slider round"></span></label>
                 </div>
-
-                <div class="setting-group-title">Notifications</div>
-                <div class="setting-row"><span>🔔 Task reminders</span><input type="checkbox" checked></div>
-                <div class="setting-row"><span>💬 Message alerts</span><input type="checkbox" checked></div>
-
-                <div class="setting-group-title">Privacy</div>
-                <div class="setting-row"><span>📍 Location sharing</span><input type="checkbox" checked></div>
-                <div class="setting-row"><span>👁 Online status</span><input type="checkbox" checked></div>
-
-                <div class="setting-group-title">Couple</div>
-                <div class="setting-row"><span>❤️ Couple Code</span><strong id="settings-code-text">LOVE-7284</strong></div>
-
-                <div class="setting-group-title">Danger Zone</div>
-                <div class="setting-row danger-row" id="leave-couple-btn">💔 Leave Couple</div>
+                <div class="setting-group-title">Couple Space Code</div>
+                <div class="setting-row"><span>Code</span><strong id="settings-code-text">---</strong></div>
             </div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Script with Firebase Module -->
+    <script type="module" src="script.js"></script>
 </body>
 </html>
