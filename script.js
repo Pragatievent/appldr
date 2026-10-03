@@ -110,20 +110,18 @@ createCoupleBtn.addEventListener('click', async () => {
         localStorage.setItem('active_couple_code', code);
         generatedCode.textContent = code;
         displayCodeBox.classList.remove('hidden');
+        alert('Success! Cloud space created with code: ' + code); // Confirms cloud write
     } catch (err) {
         alert('Error creating space: ' + err.message);
     }
-});
-
-enterAppFromCreate.addEventListener('click', () => {
-    coupleScreen.classList.remove('active');
-    appScreen.classList.add('active');
-    initCloudApp(currentCoupleCode);
-});
+});;
 
 // --- JOIN COUPLE SPACE IN FIRESTORE ---
 joinCoupleBtn.addEventListener('click', async () => {
-    const code = joinCodeInput.value.trim().toUpperCase();
+    const rawInput = joinCodeInput.value;
+    const code = rawInput.trim().toUpperCase();
+    
+    console.log("Looking for code:", JSON.stringify(code)); // Shows exact string in console
     if (!code) { alert('Enter couple code'); return; }
 
     try {
@@ -138,7 +136,7 @@ joinCoupleBtn.addEventListener('click', async () => {
             appScreen.classList.add('active');
             initCloudApp(code);
         } else {
-            alert('Couple code not found!');
+            alert(`Code "${code}" not found in database! Please check spelling.`);
         }
     } catch (err) {
         alert('Error joining: ' + err.message);
