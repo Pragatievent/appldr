@@ -3,14 +3,15 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// TODO: Replace with your own free Firebase project credentials from Firebase Console
+// Your Firebase configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyCmvl4yMvU41bojvRnvgGMqQJPWK2Kyps",
+    authDomain: "aapldr.firebaseapp.com",
+    projectId: "aapldr",
+    storageBucket: "aapldr.appspot.com",
+    messagingSenderId: "56548381427",
+    appId: "1:56548381427:web:cecb1ffc19f68df3d31d86",
+    measurementId: "G-P0WBGRWT5H"
 };
 
 // Initialize Firebase
@@ -45,7 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUserEmail = user.email;
-            document.getElementById('user-email-display').textContent = user.email;
+            const emailDisplay = document.getElementById('user-email-display');
+            if (emailDisplay) emailDisplay.textContent = user.email;
             authScreen.classList.remove('active');
 
             if (currentCoupleCode) {
@@ -145,15 +147,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Logout
-    document.getElementById('settings-logout-btn').addEventListener('click', async () => {
-        await signOut(auth);
-        localStorage.removeItem('active_couple_code');
-        window.location.reload();
-    });
+    const logoutBtn = document.getElementById('settings-logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            await signOut(auth);
+            localStorage.removeItem('active_couple_code');
+            window.location.reload();
+        });
+    }
 
     // --- REAL-TIME CLOUD APP LOGIC (Firestore Sync) ---
     function initCloudApp(coupleCode) {
-        document.getElementById('settings-code-text').textContent = coupleCode;
+        const settingsCodeText = document.getElementById('settings-code-text');
+        if (settingsCodeText) settingsCodeText.textContent = coupleCode;
 
         // Tab Switching
         const navItems = document.querySelectorAll('.bottom-nav .nav-item');
@@ -163,7 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 navItems.forEach(n => n.classList.remove('active'));
                 tabPanes.forEach(p => p.classList.remove('active'));
                 item.classList.add('active');
-                document.getElementById(`tab-${item.dataset.tab}`).classList.add('active');
+                const target = document.getElementById(`tab-${item.dataset.tab}`);
+                if (target) target.classList.add('active');
             });
         });
 
@@ -172,29 +179,31 @@ document.addEventListener('DOMContentLoaded', () => {
         const chatInput = document.getElementById('chat-input');
         const sendChatBtn = document.getElementById('send-chat-btn');
 
-        const q = query(collection(db, "couples", coupleCode, "chats"), orderBy("timestamp", "asc"));
-        onSnapshot(q, (snapshot) => {
-            chatMessages.innerHTML = '';
-            snapshot.forEach((docSnap) => {
-                const msg = docSnap.data();
-                const bubble = document.createElement('div');
-                bubble.className = `chat-bubble ${msg.sender === currentUserEmail ? 'sent' : 'received'}`;
-                bubble.textContent = msg.text;
-                chatMessages.appendChild(bubble);
+        if (chatMessages && chatInput && sendChatBtn) {
+            const q = query(collection(db, "couples", coupleCode, "chats"), orderBy("timestamp", "asc"));
+            onSnapshot(q, (snapshot) => {
+                chatMessages.innerHTML = '';
+                snapshot.forEach((docSnap) => {
+                    const msg = docSnap.data();
+                    const bubble = document.createElement('div');
+                    bubble.className = `chat-bubble ${msg.sender === currentUserEmail ? 'sent' : 'received'}`;
+                    bubble.textContent = msg.text;
+                    chatMessages.appendChild(bubble);
+                });
+                chatMessages.scrollTop = chatMessages.scrollHeight;
             });
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        });
 
-        sendChatBtn.addEventListener('click', async () => {
-            const text = chatInput.value.trim();
-            if (!text) return;
-            await addDoc(collection(db, "couples", coupleCode, "chats"), {
-                text: text,
-                sender: currentUserEmail,
-                timestamp: new Date()
+            sendChatBtn.addEventListener('click', async () => {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                await addDoc(collection(db, "couples", coupleCode, "chats"), {
+                    text: text,
+                    sender: currentUserEmail,
+                    timestamp: new Date()
+                });
+                chatInput.value = '';
             });
-            chatInput.value = '';
-        });
+        }
 
         // 2. Real-time Live GPS Location Sync
         const distanceNum = document.getElementById('home-distance-num');
@@ -206,24 +215,23 @@ document.addEventListener('DOMContentLoaded', () => {
             navigator.geolocation.getCurrentPosition(async (pos) => {
                 const lat = pos.coords.latitude;
                 const lon = pos.coords.longitude;
-                await setDoc(doc(db, "couples", coupleCode, "locations", currentUserEmail.replace('.', '_')), {
+                await setDoc(doc(db, "couples", coupleCode, "locations", currentUserEmail.replace(/[@.]/g, '_')), {
                     lat: lat, lon: lon, updatedAt: new Date()
                 }, { merge: true });
             });
         }
 
         updateMyGPS();
-        refreshGpsBtn.addEventListener('click', updateMyGPS);
+        if (refreshGpsBtn) refreshGpsBtn.addEventListener('click', updateMyGPS);
 
-        // Listen to partner's location in real-time
         onSnapshot(collection(db, "couples", coupleCode, "locations"), (snapshot) => {
             let locs = [];
             snapshot.forEach(docSnap => locs.push(docSnap.data()));
-            if (locs.length >= 2) {
+            if (locs.length >= 2 && distanceNum && modalDistanceVal) {
                 const dist = calculateHaversine(locs[0].lat, locs[0].lon, locs[1].lat, locs[1].lon);
                 distanceNum.textContent = `${dist} km apart`;
                 modalDistanceVal.textContent = `${dist} KM`;
-            } else {
+            } else if (distanceNum) {
                 distanceNum.textContent = "Waiting for partner GPS...";
             }
         });
