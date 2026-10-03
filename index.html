@@ -87,7 +87,10 @@
             
             <header class="app-header">
                 <h1 id="app-title-header">❤️ You & Her</h1>
-                <button id="logout-btn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+                <div class="header-actions">
+                    <button id="settings-btn" title="Settings"><i class="fa-solid fa-gear"></i></button>
+                    <button id="logout-btn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+                </div>
             </header>
 
             <div class="app-content">
@@ -138,9 +141,7 @@
                             <span id="partner-status-text">Online</span>
                         </div>
 
-                        <div id="chat-messages" class="chat-messages">
-                            <!-- Clean state, no demo text -->
-                        </div>
+                        <div id="chat-messages" class="chat-messages"></div>
                         
                         <div class="chat-input-row">
                             <input type="text" id="chat-input" placeholder="Type a sweet message...">
@@ -163,9 +164,7 @@
                 <div id="tab-schedule" class="tab-pane">
                     <div class="schedule-container">
                         <h3>Upcoming Dates & Plans</h3>
-                        <ul id="schedule-list" class="schedule-list">
-                            <!-- Clean state -->
-                        </ul>
+                        <ul id="schedule-list" class="schedule-list"></ul>
                         <div class="add-schedule-box">
                             <input type="text" id="event-title" placeholder="Event title...">
                             <input type="date" id="event-date">
@@ -198,6 +197,31 @@
 
         </div>
 
+    </div>
+
+    <!-- SETTINGS MODAL -->
+    <div id="settings-modal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>App Settings</h3>
+                <button id="close-settings-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="setting-item">
+                <span>Dark Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="dark-mode-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <div class="setting-divider"></div>
+            <div class="setting-item column">
+                <span>Couple Space Code</span>
+                <div style="display: flex; gap: 8px; width: 100%; margin-top: 6px;">
+                    <input type="text" id="settings-code-display" readonly style="flex: 1; padding: 8px; text-align: center; border: 1px solid #dfe4ea; border-radius: 8px; font-weight: bold; font-size: 1rem; letter-spacing: 2px;">
+                    <button id="generate-new-code-btn" class="secondary-btn" style="padding: 8px 12px; font-size: 0.8rem;">Generate New</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
