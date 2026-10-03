@@ -17,7 +17,7 @@
         <!-- ================= SCREEN 1: LOGIN / SIGNUP ================= -->
         <div id="auth-screen" class="screen active">
             <div class="auth-header">
-                <div class="heart-logo">❤️</div>
+                <div class="heart-logo">❤️️</div>
                 <h1>COUPLE APP</h1>
                 <p>Stay close, no matter the distance.</p>
             </div>
@@ -138,9 +138,7 @@
                             <span id="partner-status-text">Online</span>
                         </div>
 
-                        <div id="chat-messages" class="chat-messages">
-                            <!-- Clean state, no demo text -->
-                        </div>
+                        <div id="chat-messages" class="chat-messages"></div>
                         
                         <div class="chat-input-row">
                             <input type="text" id="chat-input" placeholder="Type a sweet message...">
@@ -163,13 +161,47 @@
                 <div id="tab-schedule" class="tab-pane">
                     <div class="schedule-container">
                         <h3>Upcoming Dates & Plans</h3>
-                        <ul id="schedule-list" class="schedule-list">
-                            <!-- Clean state -->
-                        </ul>
+                        <ul id="schedule-list" class="schedule-list"></ul>
                         <div class="add-schedule-box">
                             <input type="text" id="event-title" placeholder="Event title...">
                             <input type="date" id="event-date">
                             <button id="add-event-btn" class="primary-btn">Add Plan</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 5: SETTINGS -->
+                <div id="tab-settings" class="tab-pane">
+                    <div class="settings-container">
+                        <h3>App Settings</h3>
+
+                        <!-- Dark Mode Toggle -->
+                        <div class="setting-card">
+                            <div class="setting-info">
+                                <strong>Dark Mode</strong>
+                                <p>Switch between light and dark theme</p>
+                            </div>
+                            <label class="switch">
+                                <input type="checkbox" id="dark-mode-toggle">
+                                <span class="slider round"></span>
+                            </label>
+                        </div>
+
+                        <!-- Generate / View Code from Space -->
+                        <div class="setting-card">
+                            <div class="setting-info">
+                                <strong>Couple Invite Code</strong>
+                                <p>View or generate your pairing code</p>
+                            </div>
+                            <button id="gen-code-btn" class="secondary-btn">Show / Gen Code</button>
+                        </div>
+                        <div id="in-app-code-display" class="card hidden" style="background: #ffeaa7; color: #d63031; font-weight: 600;">
+                            Your Code: <span id="displayed-space-code" style="letter-spacing: 2px;">------</span>
+                        </div>
+
+                        <!-- Logout Button -->
+                        <div class="setting-card" style="border: none; background: transparent; padding: 0;">
+                            <button id="settings-logout-btn" class="primary-btn" style="width: 100%;">Log Out</button>
                         </div>
                     </div>
                 </div>
@@ -193,6 +225,10 @@
                 <button class="nav-item" data-tab="schedule">
                     <i class="fa-solid fa-calendar"></i>
                     <span>Schedule</span>
+                </button>
+                <button class="nav-item" data-tab="settings">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
                 </button>
             </nav>
 
