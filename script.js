@@ -266,3 +266,108 @@ function calculateHaversine(lat1, lon1, lat2, lon2) {
               Math.sin(dLon/2) * Math.sin(dLon/2);
     return Math.round(R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))));
 }
+// 3. Real-time Tasks Sync
+    const homeTaskPreviewList = document.getElementById('home-task-preview-list');
+    const fullTaskList = document.getElementById('full-task-list');
+    const openAddTaskBtn = document.getElementById('open-add-task-btn');
+    const viewAllTasksBtn = document.getElementById('view-all-tasks-btn');
+    const tasksModal = document.getElementById('tasks-modal');
+    const closeTasksModal = document.getElementById('close-tasks-modal');
+
+    if (viewAllTasksBtn && tasksModal) {
+        viewAllTasksBtn.addEventListener('click', () => tasksModal.classList.remove('hidden'));
+    }
+    if (closeTasksModal && tasksModal) {
+        closeTasksModal.addEventListener('click', () => tasksModal.classList.add('hidden'));
+    }
+
+    if (openAddTaskBtn) {
+        openAddTaskBtn.addEventListener('click', async () => {
+            const taskText = prompt("Enter a new task for today:");
+            if (!taskText) return;
+            await addDoc(collection(db, "couples", coupleCode, "tasks"), {
+                text: taskText,
+                completed: false,
+                createdAt: new Date()
+            });
+        });
+    }
+
+    if (fullTaskList && homeTaskPreviewList) {
+        const tasksQuery = query(collection(db, "couples", coupleCode, "tasks"), orderBy("createdAt", "desc"));
+        onSnapshot(tasksQuery, (snapshot) => {
+            fullTaskList.innerHTML = '';
+            homeTaskPreviewList.innerHTML = '';
+            let tasks = [];
+            snapshot.forEach((docSnap) => {
+                tasks.push({ id: docSnap.id, ...docSnap.data() });
+            });
+
+            if (tasks.length === 0) {
+                homeTaskPreviewList.innerHTML = `<li class="task-item"><span>No tasks yet. Tap 'View all' to add one!</span></li>`;
+                return;
+            }
+
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                li.innerHTML = `
+                    <input type="checkbox" ${task.completed ? 'checked' : ''}>
+                    <span>${task.text}</span>
+                `;
+                const checkbox = li.querySelector('input');
+                checkbox.addEventListener('change', async () => {
+                    await updateDoc(doc(db, "couples", coupleCode, "tasks", task.id), {
+                        completed: checkbox.checked
+                    });
+                });
+                fullTaskList.appendChild(li);
+
+                if (index < 3) {
+                    const previewLi = li.cloneNode(true);
+                    const previewCheckbox = previewLi.querySelector('input');
+                    previewCheckbox.addEventListener('change', async () => {
+                        await updateDoc(doc(db, "couples", coupleCode, "tasks", task.id), {
+                            completed: previewCheckbox.checked
+                        });
+                    });
+                    homeTaskPreviewList.appendChild(previewLi);
+                }
+            });
+        });
+    }
+     // 4. Real-time Plans / Timeline Sync
+    const timelineContainer = document.getElementById('timeline-container');
+    const openAddPlanModal = document.getElementById('open-add-plan-modal');
+
+    if (openAddPlanModal) {
+        openAddPlanModal.addEventListener('click', async () => {
+            const planTitle = prompt("Enter plan title (e.g., ❤️ Video Call):");
+            if (!planTitle) return;
+            const planTime = prompt("Enter time/date (e.g., Tonight • 8:30 PM):");
+            if (!planTime) return;
+
+            await addDoc(collection(db, "couples", coupleCode, "plans"), {
+                title: planTitle,
+                time: planTime,
+                createdAt: new Date()
+            });
+        });
+    }
+
+    if (timelineContainer) {
+        const plansQuery = query(collection(db, "couples", coupleCode, "plans"), orderBy("createdAt", "asc"));
+        onSnapshot(plansQuery, (snapshot) => {
+            timelineContainer.innerHTML = `<div class="timeline-group-label">UPCOMING PLANS</div>`;
+            snapshot.forEach((docSnap) => {
+                const plan = docSnap.data();
+                const card = document.createElement('div');
+                card.className = 'timeline-card';
+                card.innerHTML = `
+                    <strong>${plan.title}</strong>
+                    <p>${plan.time}</p>
+                `;
+                timelineContainer.appendChild(card);
+            });
+        });
+    }   
