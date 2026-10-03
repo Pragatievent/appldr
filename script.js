@@ -5,13 +5,13 @@ import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, onSna
 
 // Your Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyCmvl4yMvU41bojvRnvgGMqQJPWK2Kyps",
-    authDomain: "aapldr.firebaseapp.com",
-    projectId: "aapldr",
-    storageBucket: "aapldr.appspot.com",
-    messagingSenderId: "56548381427",
-    appId: "1:56548381427:web:cecb1ffc19f68df3d31d86",
-    measurementId: "G-P0WBGRWT5H"
+  apiKey: "AIzaSyCKcUpYblUPXLqEOb4HXVEW2UoJWBTj5fQ",
+  authDomain: "aapldr-db8cc.firebaseapp.com",
+  projectId: "aapldr-db8cc",
+  storageBucket: "aapldr-db8cc.firebasestorage.app",
+  messagingSenderId: "41936129144",
+  appId: "1:41936129144:web:dde915da4bcf73cec6718d",
+  measurementId: "G-G655PVB97P"
 };
 
 // Initialize Firebase
