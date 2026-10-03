@@ -1,248 +1,977 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Screens
-    const authScreen = document.getElementById('auth-screen');
-    const verifyScreen = document.getElementById('verify-screen');
-    const coupleScreen = document.getElementById('couple-screen');
-    const appScreen = document.getElementById('app-screen');
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+}
 
-    // Auth & Verify Elements
-    const authTitle = document.getElementById('auth-title');
-    const authSubmitBtn = document.getElementById('auth-submit-btn');
-    const switchAuthText = document.getElementById('switch-auth-text');
-    const switchAuthLink = document.getElementById('switch-auth-link');
-    const authEmail = document.getElementById('auth-email');
-    const authPassword = document.getElementById('auth-password');
-    const verifyCodeInput = document.getElementById('verify-code-input');
-    const verifySubmitBtn = document.getElementById('verify-submit-btn');
-    const resendCodeLink = document.getElementById('resend-code-link');
+body {
+    background: #fafafa;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-    // Couple Elements
-    const createCoupleBtn = document.getElementById('create-couple-btn');
-    const displayCodeBox = document.getElementById('display-code-box');
-    const generatedCode = document.getElementById('generated-code');
-    const enterAppFromCreate = document.getElementById('enter-app-from-create');
-    const joinCodeInput = document.getElementById('join-code-input');
-    const joinCoupleBtn = document.getElementById('join-couple-btn');
+.app-container {
+    width: 100%;
+    max-width: 390px;
+    height: 100%;
+    max-height: 844px;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
 
-    // Modals & Sheets
-    const tasksModal = document.getElementById('tasks-modal');
-    const closeTasksModal = document.getElementById('close-tasks-modal');
-    const viewAllTasksBtn = document.getElementById('view-all-tasks-btn');
-    const addTaskSheet = document.getElementById('add-task-sheet');
-    const openAddTaskBtn = document.getElementById('open-add-task-btn');
-    const submitNewTaskBtn = document.getElementById('submit-new-task-btn');
-    const newTaskName = document.getElementById('new-task-name');
-    const fullTaskList = document.getElementById('full-task-list');
-
-    const distanceModal = document.getElementById('distance-modal');
-    const closeDistanceModal = document.getElementById('close-distance-modal');
-    const homeDistanceCard = document.getElementById('home-distance-card');
-    const refreshGpsBtn = document.getElementById('refresh-gps-btn');
-    const modalDistanceVal = document.getElementById('modal-distance-val');
-
-    const notificationsModal = document.getElementById('notifications-modal');
-    const closeNotificationsModal = document.getElementById('close-notifications-modal');
-    const openNotificationsBtn = document.getElementById('open-notifications-btn');
-
-    const settingsSubmodal = document.getElementById('settings-submodal');
-    const closeSettingsModal = document.getElementById('close-settings-modal');
-    const goToSettingsBtn = document.getElementById('go-to-settings-btn');
-    const menuSettings = document.getElementById('menu-settings');
-    const darkModeToggle = document.getElementById('dark-mode-toggle');
-    const leaveCoupleBtn = document.getElementById('leave-couple-btn');
-    const settingsLogoutBtn = document.getElementById('settings-logout-btn');
-
-    // Chat Elements
-    const chatMessages = document.getElementById('chat-messages');
-    const chatInput = document.getElementById('chat-input');
-    const sendChatBtn = document.getElementById('send-chat-btn');
-    const homeLastMessageBtn = document.getElementById('home-last-message-btn');
-
-    let isLoginMode = true;
-
-    // --- DARK MODE INIT ---
-    if (localStorage.getItem('dark_mode') === 'true') {
-        document.body.classList.add('dark-mode');
-        if (darkModeToggle) darkModeToggle.checked = true;
+@media (min-width: 480px) {
+    .app-container {
+        border-radius: 40px;
+        border: 8px solid #2f3640;
+        height: 844px;
     }
+}
 
-    if (darkModeToggle) {
-        darkModeToggle.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('dark_mode', 'true');
-            } else {
-                document.body.classList.remove('dark-mode');
-                localStorage.setItem('dark_mode', 'false');
-            }
-        });
-    }
+/* Screen Management */
+.screen {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    background: #fafafa;
+    overflow: hidden;
+    height: 100%;
+}
 
-    // --- AUTH FLOW ---
-    switchAuthLink.addEventListener('click', () => {
-        isLoginMode = !isLoginMode;
-        if (isLoginMode) {
-            authTitle.textContent = "Welcome Back";
-            authSubmitBtn.textContent = "Log In";
-            switchAuthText.textContent = "Don't have an account?";
-            switchAuthLink.textContent = "Sign Up";
-        } else {
-            authTitle.textContent = "Create Account";
-            authSubmitBtn.textContent = "Sign Up";
-            switchAuthText.textContent = "Already have an account?";
-            switchAuthLink.textContent = "Log In";
-        }
-    });
+.screen.active {
+    display: flex;
+}
 
-    authSubmitBtn.addEventListener('click', () => {
-        const email = authEmail.value.trim();
-        const pwd = authPassword.value.trim();
-        if (!email || !pwd) { alert('Please fill in all fields'); return; }
-        if (!email.includes('@') || !email.includes('.')) { alert('Enter a valid email containing "@" and "."'); return; }
+.hidden {
+    display: none !important;
+}
 
-        localStorage.setItem('couple_user', email);
-        if (isLoginMode) {
-            authScreen.classList.remove('active');
-            if (localStorage.getItem('paired_couple')) {
-                appScreen.classList.add('active');
-                initApp();
-            } else {
-                coupleScreen.classList.add('active');
-            }
-        } else {
-            const vCode = Math.floor(1000 + Math.random() * 9000).toString();
-            localStorage.setItem('pending_verify_code', vCode);
-            alert(`[Inbox Simulation] Verification code sent to ${email}:\nCode: ${vCode}`);
-            authScreen.classList.remove('active');
-            verifyScreen.classList.add('active');
-        }
-    });
+/* Auth Screens */
+#auth-screen, #verify-screen, #couple-screen {
+    padding: 30px 24px;
+    justify-content: center;
+    background: linear-gradient(135deg, #fff, #ffeaa7);
+    text-align: center;
+    overflow-y: auto;
+}
 
-    verifySubmitBtn.addEventListener('click', () => {
-        const code = verifyCodeInput.value.trim();
-        const expected = localStorage.getItem('pending_verify_code') || '1234';
-        if (code !== expected) { alert('Incorrect verification code'); return; }
-        verifyScreen.classList.remove('active');
-        coupleScreen.classList.add('active');
-    });
+.heart-logo {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+    animation: pulse 1.5s infinite;
+}
 
-    resendCodeLink.addEventListener('click', () => {
-        alert(`[Inbox Simulation] Code: ${localStorage.getItem('pending_verify_code') || '1234'}`);
-    });
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
 
-    // --- COUPLE CONNECTION ---
-    createCoupleBtn.addEventListener('click', () => {
-        let code = localStorage.getItem('couple_space_code');
-        if (!code) {
-            code = 'LOVE-' + Math.floor(1000 + Math.random() * 9000);
-            localStorage.setItem('couple_space_code', code);
-        }
-        generatedCode.textContent = code;
-        displayCodeBox.classList.remove('hidden');
-    });
+.auth-header h1, .couple-header h2 {
+    color: #d63031;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
 
-    enterAppFromCreate.addEventListener('click', () => {
-        localStorage.setItem('paired_couple', 'true');
-        coupleScreen.classList.remove('active');
-        appScreen.classList.add('active');
-        initApp();
-    });
+.auth-header p, .couple-header p {
+    color: #636e72;
+    font-size: 0.9rem;
+    margin-bottom: 25px;
+}
 
-    joinCoupleBtn.addEventListener('click', () => {
-        const entered = joinCodeInput.value.trim().toUpperCase();
-        if (!entered) { alert('Please enter code'); return; }
-        localStorage.setItem('couple_space_code', entered);
-        localStorage.setItem('paired_couple', 'true');
-        coupleScreen.classList.remove('active');
-        appScreen.classList.add('active');
-        initApp();
-    });
+.auth-form-card {
+    background: white;
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: left;
+    width: 100%;
+}
 
-    // Logout
-    function logoutUser() {
-        localStorage.removeItem('paired_couple');
-        appScreen.classList.remove('active');
-        authScreen.classList.add('active');
-    }
-    if (settingsLogoutBtn) settingsLogoutBtn.addEventListener('click', logoutUser);
-    if (leaveCoupleBtn) leaveCoupleBtn.addEventListener('click', logoutUser);
+.auth-form-card h2 {
+    font-size: 1.2rem;
+    color: #2f3640;
+    margin-bottom: 5px;
+}
 
-    // --- MAIN APP INIT ---
-    function initApp() {
-        // Bottom Navigation (5 tabs)
-        const navItems = document.querySelectorAll('.bottom-nav .nav-item');
-        const tabPanes = document.querySelectorAll('.app-content .tab-pane');
+.input-group {
+    display: flex;
+    align-items: center;
+    background: #f1f2f6;
+    border-radius: 12px;
+    padding: 0 12px;
+    border: 1px solid #dfe4ea;
+}
 
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                navItems.forEach(nav => nav.classList.remove('active'));
-                tabPanes.forEach(pane => pane.classList.remove('active'));
-                item.classList.add('active');
-                const target = document.getElementById(`tab-${item.dataset.tab}`);
-                if (target) target.classList.add('active');
-            });
-        });
+.input-group i {
+    color: #b2bec3;
+    margin-right: 10px;
+}
 
-        // Moments Subtabs
-        const momentSubtabs = document.querySelectorAll('.subtab-btn');
-        momentSubtabs.forEach(btn => {
-            btn.addEventListener('click', () => {
-                momentSubtabs.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                document.querySelectorAll('.subtab-pane').forEach(p => p.classList.remove('active'));
-                document.getElementById(`subtab-pane-${btn.dataset.subtab}`).classList.add('active');
-            });
-        });
+.input-group input {
+    width: 100%;
+    padding: 12px 0;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 0.9rem;
+    color: #2f3640;
+}
 
-        // Modals Listeners
-        viewAllTasksBtn.addEventListener('click', () => tasksModal.classList.remove('hidden'));
-        closeTasksModal.addEventListener('click', () => tasksModal.classList.add('hidden'));
+.primary-btn {
+    background: linear-gradient(135deg, #ff7675, #d63031);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: opacity 0.2s;
+}
 
-        openAddTaskBtn.addEventListener('click', () => addTaskSheet.classList.remove('hidden'));
-        submitNewTaskBtn.addEventListener('click', () => {
-            const val = newTaskName.value.trim();
-            if (!val) return;
-            const li = document.createElement('li');
-            li.className = 'task-item';
-            li.innerHTML = `<input type="checkbox"> <span>${val}</span>`;
-            fullTaskList.appendChild(li);
-            newTaskName.value = '';
-            addTaskSheet.classList.add('hidden');
-        });
+.primary-btn:hover {
+    opacity: 0.9;
+}
 
-        homeDistanceCard.addEventListener('click', () => distanceModal.classList.remove('hidden'));
-        closeDistanceModal.addEventListener('click', () => distanceModal.classList.add('hidden'));
+.secondary-btn {
+    background: #2f3640;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
 
-        openNotificationsBtn.addEventListener('click', () => notificationsModal.classList.remove('hidden'));
-        closeNotificationsModal.addEventListener('click', () => notificationsModal.classList.add('hidden'));
+.switch-auth {
+    font-size: 0.8rem;
+    text-align: center;
+    color: #636e72;
+}
 
-        if (goToSettingsBtn) goToSettingsBtn.addEventListener('click', () => settingsSubmodal.classList.remove('hidden'));
-        if (menuSettings) menuSettings.addEventListener('click', () => settingsSubmodal.classList.remove('hidden'));
-        closeSettingsModal.addEventListener('click', () => settingsSubmodal.classList.add('hidden'));
+.switch-auth strong {
+    color: #d63031;
+    font-weight: 600;
+    cursor: pointer;
+}
 
-        homeLastMessageBtn.addEventListener('click', () => {
-            navItems.forEach(n => n.classList.remove('active'));
-            tabPanes.forEach(p => p.classList.remove('active'));
-            document.querySelector('[data-tab="chat"]').classList.add('active');
-            document.getElementById('tab-chat').classList.add('active');
-        });
+.divider {
+    font-weight: 600;
+    color: #b2bec3;
+    font-size: 0.85rem;
+    margin: 15px 0;
+}
 
-        // Chat send
-        sendChatBtn.addEventListener('click', () => {
-            const text = chatInput.value.trim();
-            if (!text) return;
-            const bubble = document.createElement('div');
-            bubble.className = 'chat-bubble sent';
-            bubble.textContent = text;
-            chatMessages.appendChild(bubble);
-            chatInput.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        });
+.couple-options {
+    background: white;
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-        // Live GPS Refresh simulation
-        refreshGpsBtn.addEventListener('click', () => {
-            modalDistanceVal.textContent = "Updating...";
-            setTimeout(() => { modalDistanceVal.textContent = "720 KM"; alert('Location updated successfully!'); }, 1000);
-        });
-    }
-});
+/* Main App Layout */
+.app-content {
+    flex: 1;
+    overflow-y: auto;
+    background: #fafafa;
+    position: relative;
+}
+
+.tab-pane {
+    display: none;
+    padding: 16px;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.tab-pane.active {
+    display: flex;
+}
+
+/* Design System Cards */
+.card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f2f6;
+}
+
+/* Home Top Bar */
+.home-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.home-top-bar h1 {
+    font-size: 1.2rem;
+    color: #d63031;
+    font-weight: 600;
+}
+
+.home-top-icons {
+    display: flex;
+    gap: 10px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #718093;
+    cursor: pointer;
+    padding: 4px;
+}
+
+/* Distance Card */
+.distance-card {
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.distance-card:active {
+    transform: scale(0.98);
+}
+
+.distance-header {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #2f3640;
+    margin-bottom: 4px;
+}
+
+.cities {
+    font-size: 0.9rem;
+    color: #718093;
+    font-weight: 500;
+}
+
+.updated-time {
+    font-size: 0.75rem;
+    color: #b2bec3;
+    margin-top: 4px;
+}
+
+/* Countdown Card */
+.countdown-card {
+    background: linear-gradient(135deg, #ff7675, #d63031);
+    color: white;
+    text-align: center;
+    cursor: pointer;
+}
+
+.countdown-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    opacity: 0.9;
+    margin-bottom: 6px;
+}
+
+.countdown-days {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.countdown-label {
+    font-size: 0.85rem;
+    opacity: 0.95;
+}
+
+/* Tasks Preview */
+.tasks-card {
+    text-align: left;
+}
+
+.card-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #2f3640;
+    margin-bottom: 10px;
+}
+
+.text-link {
+    background: none;
+    border: none;
+    color: #d63031;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.task-preview-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #2f3640;
+}
+
+.task-item.completed span {
+    text-decoration: line-through;
+    color: #b2bec3;
+}
+
+.task-item input[type="checkbox"] {
+    accent-color: #d63031;
+    width: 16px;
+    height: 16px;
+}
+
+/* Next Plan & Last Message Cards */
+.next-plan-card, .last-message-card {
+    cursor: pointer;
+}
+
+.next-plan-details strong {
+    font-size: 0.9rem;
+    color: #2f3640;
+}
+
+.next-plan-details p {
+    font-size: 0.75rem;
+    color: #718093;
+}
+
+.last-msg-text {
+    font-size: 0.9rem;
+    color: #636e72;
+    font-style: italic;
+}
+
+/* Chat Tab */
+.chat-top-bar {
+    padding: 12px 16px;
+    background: #fff;
+    border-bottom: 1px solid #f1f2f6;
+    display: flex;
+    align-items: center;
+}
+
+.chat-partner-info {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-partner-info strong {
+    font-size: 0.95rem;
+    color: #2f3640;
+}
+
+.online-status {
+    font-size: 0.7rem;
+    color: #00b894;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.chat-timestamp-badge {
+    align-self: center;
+    font-size: 0.65rem;
+    color: #b2bec3;
+    background: #f1f2f6;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin: 6px 0;
+}
+
+.chat-bubble {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.chat-bubble.sent {
+    background: #d63031;
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+
+.chat-bubble.received {
+    background: #ffffff;
+    color: #2f3640;
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+    border: 1px solid #f1f2f6;
+}
+
+.chat-input-area {
+    padding: 10px 16px;
+    background: #fff;
+    border-top: 1px solid #f1f2f6;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-action-btn, .chat-send-btn {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #718093;
+    cursor: pointer;
+}
+
+.chat-send-btn {
+    color: #d63031;
+}
+
+.chat-input-area input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #dfe4ea;
+    border-radius: 20px;
+    outline: none;
+    font-size: 0.85rem;
+}
+
+/* Moments Tab */
+.moments-header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.moments-header h2 {
+    font-size: 1.2rem;
+    color: #2f3640;
+}
+
+.moments-subtabs, .task-subtabs {
+    display: flex;
+    background: #f1f2f6;
+    border-radius: 10px;
+    padding: 3px;
+}
+
+.subtab-btn, .task-subtab {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #718093;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.subtab-btn.active, .task-subtab.active {
+    background: #ffffff;
+    color: #2f3640;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.subtab-pane {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.subtab-pane.active {
+    display: flex;
+}
+
+.random-selfie-card {
+    text-align: center;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #fff, #ffeaa7);
+}
+
+.random-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #d63031;
+    margin-bottom: 10px;
+}
+
+.random-prompt {
+    font-size: 1rem;
+    color: #2f3640;
+    font-weight: 500;
+}
+
+.memories-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.memory-cell {
+    aspect-ratio: 1;
+    background: #e2e8f0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a0aec0;
+    font-size: 1.2rem;
+}
+
+.add-memory-cell {
+    background: #edf2f7;
+    flex-direction: column;
+    font-size: 0.8rem;
+    color: #718093;
+    cursor: pointer;
+    gap: 2px;
+}
+
+/* Plans Tab */
+.plans-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.plans-header h2 {
+    font-size: 1.2rem;
+    color: #2f3640;
+}
+
+.timeline-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.timeline-group-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #b2bec3;
+    margin-top: 10px;
+    letter-spacing: 1px;
+}
+
+.timeline-card {
+    background: #ffffff;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border-left: 4px solid #d63031;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.timeline-card strong {
+    font-size: 0.9rem;
+    color: #2f3640;
+}
+
+.timeline-card p {
+    font-size: 0.75rem;
+    color: #718093;
+}
+
+/* Us Tab */
+.us-profile-header {
+    text-align: center;
+    padding: 10px 0;
+}
+
+.us-heart-badge {
+    font-size: 2.5rem;
+    margin-bottom: 4px;
+}
+
+.us-profile-header h2 {
+    font-size: 1.2rem;
+    color: #2f3640;
+}
+
+.us-profile-header p {
+    font-size: 0.8rem;
+    color: #718093;
+}
+
+.us-menu-list {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    border: 1px solid #f1f2f6;
+}
+
+.us-menu-item {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #2f3640;
+    border-bottom: 1px solid #f1f2f6;
+    cursor: pointer;
+}
+
+.us-menu-item:last-child {
+    border-bottom: none;
+}
+
+.us-menu-item span {
+    flex: 1;
+    margin-left: 10px;
+}
+
+.us-menu-item i {
+    color: #b2bec3;
+    font-size: 0.8rem;
+}
+
+.us-menu-item.danger {
+    color: #d63031;
+    justify-content: center;
+    font-weight: 600;
+}
+
+/* Modals & Bottom Sheets */
+.modal-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.modal-content {
+    background: #fafafa;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.modal-header h2 {
+    font-size: 1.1rem;
+    color: #2f3640;
+}
+
+.bottom-sheet {
+    background: white;
+    padding: 24px;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.bottom-sheet h3 {
+    font-size: 1.1rem;
+    color: #2f3640;
+    text-align: center;
+}
+
+.sheet-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+}
+
+.sheet-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #718093;
+}
+
+.sheet-group input, .sheet-group select {
+    padding: 10px;
+    border: 1px solid #dfe4ea;
+    border-radius: 10px;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+/* Task Modal specific */
+.task-progress-banner {
+    background: #ffeaa7;
+    color: #d63031;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.full-task-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+/* Distance Modal specific */
+.distance-detail-card {
+    background: white;
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    text-align: center;
+}
+
+.big-pin {
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+}
+
+.big-distance {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2f3640;
+    margin-bottom: 15px;
+}
+
+.locations-row {
+    display: flex;
+    justify-content: space-around;
+    font-size: 0.9rem;
+    color: #718093;
+}
+
+.locations-row strong {
+    color: #2f3640;
+}
+
+.privacy-notice {
+    font-size: 0.75rem;
+    color: #b2bec3;
+    text-align: center;
+    margin-top: 15px;
+}
+
+/* Notifications List */
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notif-item {
+    background: white;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    color: #2f3640;
+    border-left: 4px solid #ff7675;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+/* Settings Sub-modal */
+.settings-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.setting-group-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #b2bec3;
+    letter-spacing: 1px;
+    margin-top: 5px;
+}
+
+.setting-row {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #2f3640;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.danger-row {
+    color: #d63031;
+    font-weight: 600;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 22px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: #d63031; }
+input:checked + .slider:before { transform: translateX(22px); }
+
+/* Fixed Bottom Navigation Bar (5 Items) */
+.bottom-nav {
+    height: 65px;
+    background: #ffffff;
+    border-top: 1px solid #f1f2f6;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 5px;
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    color: #b2bec3;
+    cursor: pointer;
+    font-size: 0.7rem;
+    flex: 1;
+    transition: color 0.2s ease;
+}
+
+.nav-item i {
+    font-size: 1.1rem;
+}
+
+.nav-item.active {
+    color: #d63031;
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background: #121212 !important;
+}
+
+body.dark-mode .app-container {
+    background: #121212 !important;
+    color: #f1f2f6;
+}
+
+body.dark-mode .card,
+body.dark-mode .auth-form-card,
+body.dark-mode .couple-options,
+body.dark-mode .chat-top-bar,
+body.dark-mode .chat-input-area,
+body.dark-mode .modal-content,
+body.dark-mode .bottom-sheet,
+body.dark-mode .distance-detail-card,
+body.dark-mode .notif-item,
+body.dark-mode .setting-row,
+body.dark-mode .us-menu-list,
+body.dark-mode .bottom-nav,
+body.dark-mode .timeline-card {
+    background: #1e1e1e !important;
+    border-color: #2d3436 !important;
+    color: #f1f2f6 !important;
+}
+
+body.dark-mode .home-top-bar h1,
+body.dark-mode .distance-header,
+body.dark-mode .card-title-row span,
+body.dark-mode .us-profile-header h2,
+body.dark-mode .modal-header h2,
+body.dark-mode .bottom-sheet h3 {
+    color: #ff7675 !important;
+}
+
+body.dark-mode .cities,
+body.dark-mode .updated-time,
+body.dark-mode .us-profile-header p,
+body.dark-mode .next-plan-details p,
+body.dark-mode .timeline-card p {
+    color: #b2bec3 !important;
+}
+
+body.dark-mode input, body.dark-mode select {
+    background: #2d3436 !important;
+    color: #fff !important;
+    border-color: #4b6584 !important;
+}
+
+body.dark-mode .chat-bubble.received,
+body.dark-mode .task-item {
+    background: #2d3436 !important;
+    color: #f1f2f6 !important;
+}
+
+body.dark-mode .subtab-btn.active, body.dark-mode .task-subtab.active {
+    background: #2d3436 !important;
+    color: #fff !important;
+}
