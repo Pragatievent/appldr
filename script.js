@@ -27,48 +27,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const joinCodeInput = document.getElementById('join-code-input');
     const joinCoupleBtn = document.getElementById('join-couple-btn');
 
-    // Settings & Dark Mode Elements
-    const settingsBtn = document.getElementById('settings-btn');
-    const settingsModal = document.getElementById('settings-modal');
-    const closeSettingsBtn = document.getElementById('close-settings-btn');
+    // Settings / Dark Mode Elements
     const darkModeToggle = document.getElementById('dark-mode-toggle');
-    const settingsCodeDisplay = document.getElementById('settings-code-display');
-    const generateNewCodeBtn = document.getElementById('generate-new-code-btn');
+    const genCodeBtn = document.getElementById('gen-code-btn');
+    const inAppCodeDisplay = document.getElementById('in-app-code-display');
+    const displayedSpaceCode = document.getElementById('displayed-space-code');
+    const settingsLogoutBtn = document.getElementById('settings-logout-btn');
 
     let isLoginMode = true;
 
-    // --- DARK MODE INIT ---
+    // --- CHECK SAVED DARK MODE PREFERENCE ---
     if (localStorage.getItem('dark_mode') === 'true') {
         document.body.classList.add('dark-mode');
-        darkModeToggle.checked = true;
+        if (darkModeToggle) darkModeToggle.checked = true;
     }
 
-    darkModeToggle.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            document.body.classList.add('dark-mode');
-            localStorage.setItem('dark_mode', 'true');
-        } else {
-            document.body.classList.remove('dark-mode');
-            localStorage.setItem('dark_mode', 'false');
-        }
-    });
-
-    // --- SETTINGS MODAL LOGIC ---
-    settingsBtn.addEventListener('click', () => {
-        settingsModal.classList.remove('hidden');
-        settingsCodeDisplay.value = localStorage.getItem('couple_space_code') || '------';
-    });
-
-    closeSettingsBtn.addEventListener('click', () => {
-        settingsModal.classList.add('hidden');
-    });
-
-    generateNewCodeBtn.addEventListener('click', () => {
-        const newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-        localStorage.setItem('couple_space_code', newCode);
-        settingsCodeDisplay.value = newCode;
-        alert(`New couple code generated successfully: ${newCode}`);
-    });
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('dark_mode', 'true');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('dark_mode', 'false');
+            }
+        });
+    }
 
     // --- AUTH TOGGLE LOGIC ---
     switchAuthLink.addEventListener('click', () => {
@@ -114,7 +98,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             const randomVerifyCode = Math.floor(1000 + Math.random() * 9000).toString();
             localStorage.setItem('pending_verify_code', randomVerifyCode);
-            
             alert(`[Inbox Simulation] Verification code sent to ${email}:\nYour Code is: ${randomVerifyCode}`);
             
             authScreen.classList.remove('active');
@@ -146,7 +129,7 @@ document.addEventListener('DOMContentLoaded', () => {
         alert(`[Inbox Simulation] Resent verification code: ${resendCode}`);
     });
 
-    // --- CREATE / JOIN COUPLE (SYNCHRONIZED) ---
+    // --- CREATE / JOIN COUPLE ---
     createCoupleBtn.addEventListener('click', () => {
         let activeCode = localStorage.getItem('couple_space_code');
         if (!activeCode) {
@@ -189,13 +172,29 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // --- LOGOUT ---
-    logoutBtn.addEventListener('click', () => {
+    // --- LOGOUT HANDLERS ---
+    function performLogout() {
         localStorage.removeItem('couple_user');
         localStorage.removeItem('paired_couple');
         appScreen.classList.remove('active');
         authScreen.classList.add('active');
-    });
+    }
+
+    logoutBtn.addEventListener('click', performLogout);
+    if (settingsLogoutBtn) settingsLogoutBtn.addEventListener('click', performLogout);
+
+    // --- IN-APP CODE GENERATION / DISPLAY HANDLER ---
+    if (genCodeBtn) {
+        genCodeBtn.addEventListener('click', () => {
+            let activeCode = localStorage.getItem('couple_space_code');
+            if (!activeCode) {
+                activeCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                localStorage.setItem('couple_space_code', activeCode);
+            }
+            displayedSpaceCode.textContent = activeCode;
+            inAppCodeDisplay.classList.remove('hidden');
+        });
+    }
 
     // --- MAIN APP FUNCTIONALITY ---
     function initApp() {
@@ -205,253 +204,279 @@ document.addEventListener('DOMContentLoaded', () => {
         navItems.forEach(item => {
             item.addEventListener('click', () => {
                 navItems.forEach(nav => nav.classList.remove('active'));
-                tabPanes.forEach(pane => paneHere are the updated **`index.html`**, **`style.css`**, and **`script.js`** files featuring:
-1. **Dark Mode Toggle:** A settings option that switches the entire app theme to a dark mode and saves your preference in `localStorage`.
-2. **In-App Code Generation:** A settings section where you can view, regenerate, or share your couple pairing code directly from inside the app without logging out.
-3. **Settings Tab:** Added a 5th navigation tab (`⚙️ Settings`) at the bottom bar.
+                tabPanes.forEach(pane => pane.classList.remove('active'));
 
----
+                item.classList.add('active');
+                const targetTab = document.getElementById(`tab-${item.dataset.tab}`);
+                if (targetTab) targetTab.classList.add('active');
+            });
+        });
 
-### 1. `index.html`
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Couple App - You & Her</title>
-    <!-- Google Fonts -->
-    <link href="[https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap](https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap)" rel="stylesheet">
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css)">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+        initLiveDistance();
+        initTasks();
+        initChat();
+        initSchedule();
 
-    <div class="app-container">
-        
-        <!-- ================= SCREEN 1: LOGIN / SIGNUP ================= -->
-        <div id="auth-screen" class="screen active">
-            <div class="auth-header">
-                <div class="heart-logo">❤️</div>
-                <h1>COUPLE APP</h1>
-                <p>Stay close, no matter the distance.</p>
+        const photoUpload = document.getElementById('photo-upload');
+        photoUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    addMomentCard(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    // --- TWO-WAY LIVE GPS DISTANCE TRACKING ---
+    function initLiveDistance() {
+        const distanceNum = document.getElementById('live-distance-num');
+        const distanceSubtext = document.getElementById('distance-subtext');
+        const updateGpsBtn = document.getElementById('update-gps-btn');
+
+        const currentUser = localStorage.getItem('couple_user') || 'user1';
+        const isUserOne = currentUser.includes('1') || !localStorage.getItem('user_role');
+        const myLocationKey = isUserOne ? 'user_a_loc' : 'user_b_loc';
+        const partnerLocationKey = isUserOne ? 'user_b_loc' : 'user_a_loc';
+
+        function updateAndCalculateDistance() {
+            if (!navigator.geolocation) {
+                distanceNum.textContent = "GPS not supported";
+                return;
+            }
+
+            distanceNum.textContent = "Fetching GPS...";
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const myLat = position.coords.latitude;
+                    const myLon = position.coords.longitude;
+
+                    localStorage.setItem(myLocationKey, JSON.stringify({ lat: myLat, lon: myLon }));
+                    const partnerData = localStorage.getItem(partnerLocationKey);
+
+                    if (partnerData) {
+                        const partnerCoord = JSON.parse(partnerData);
+                        const dist = calculateHaversine(myLat, myLon, partnerCoord.lat, partnerCoord.lon);
+                        distanceNum.textContent = `${dist} km`;
+                        distanceSubtext.textContent = `Live GPS Distance Between You & Partner`;
+                    } else {
+                        const defaultPartnerLat = 23.2599;
+                        const defaultPartnerLon = 77.4126;
+                        const dist = calculateHaversine(myLat, myLon, defaultPartnerLat, defaultPartnerLon);
+                        distanceNum.textContent = `${dist} km`;
+                        distanceSubtext.textContent = `Live GPS (Partner location waiting for sync)`;
+                    }
+                },
+                (error) => {
+                    distanceNum.textContent = "GPS Permission Denied";
+                    distanceSubtext.textContent = "Enable location services in browser";
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+
+        updateAndCalculateDistance();
+        if (updateGpsBtn) updateGpsBtn.addEventListener('click', updateAndCalculateDistance);
+        setInterval(updateAndCalculateDistance, 10000);
+    }
+
+    function calculateHaversine(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return Math.round(R * c);
+    }
+
+    // --- DUAL-SLOT TASKS LOGIC ---
+    function initTasks() {
+        const assignedToPartnerList = document.getElementById('assigned-to-partner-list');
+        const assignedByPartnerList = document.getElementById('assigned-by-partner-list');
+        const assignPartnerInput = document.getElementById('assign-partner-input');
+        const assignPartnerBtn = document.getElementById('assign-partner-btn');
+
+        let tasksToPartner = [];
+        let tasksByPartner = [];
+
+        function renderTasks() {
+            assignedToPartnerList.innerHTML = '';
+            if (tasksToPartner.length === 0) {
+                assignedToPartnerList.innerHTML = `<li style="font-size: 0.8rem; color: #b2bec3; text-align: center; padding: 4px;">No tasks assigned yet</li>`;
+            } else {
+                tasksToPartner.forEach((task, index) => {
+                    const li = document.createElement('li');
+                    li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                    li.innerHTML = `
+                        <span>${task.text}</span>
+                        <input type="checkbox" ${task.completed ? 'checked' : ''}>
+                    `;
+                    li.querySelector('input').addEventListener('change', (e) => {
+                        tasksToPartner[index].completed = e.target.checked;
+                        renderTasks();
+                    });
+                    assignedToPartnerList.appendChild(li);
+                });
+            }
+
+            assignedByPartnerList.innerHTML = '';
+            if (tasksByPartner.length === 0) {
+                assignedByPartnerList.innerHTML = `<li style="font-size: 0.8rem; color: #b2bec3; text-align: center; padding: 4px;">No tasks from partner yet</li>`;
+            } else {
+                tasksByPartner.forEach((task, index) => {
+                    const li = document.createElement('li');
+                    li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                    li.innerHTML = `
+                        <span>${task.text}</span>
+                        <input type="checkbox" ${task.completed ? 'checked' : ''}>
+                    `;
+                    li.querySelector('input').addEventListener('change', (e) => {
+                        tasksByPartner[index].completed = e.target.checked;
+                        renderTasks();
+                    });
+                    assignedByPartnerList.appendChild(li);
+                });
+            }
+        }
+
+        if (assignPartnerBtn) {
+            assignPartnerBtn.addEventListener('click', () => {
+                const val = assignPartnerInput.value.trim();
+                if (!val) return;
+                tasksToPartner.push({ text: val, completed: false });
+                assignPartnerInput.value = '';
+                renderTasks();
+            });
+        }
+
+        renderTasks();
+    }
+
+    // --- CHAT LOGIC ---
+    function initChat() {
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const sendChatBtn = document.getElementById('send-chat-btn');
+        const partnerStatusText = document.getElementById('partner-status-text');
+        const statusDot = document.getElementById('status-dot');
+
+        chatMessages.innerHTML = '';
+
+        if (sendChatBtn) {
+            sendChatBtn.addEventListener('click', () => {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                
+                appendSentMessage(text);
+                chatInput.value = '';
+
+                setTimeout(() => {
+                    partnerStatusText.textContent = "typing...";
+                    statusDot.classList.add('online');
+                }, 800);
+
+                setTimeout(() => {
+                    partnerStatusText.textContent = "Online";
+                    appendReceivedMessage("Got your message! ❤️");
+                }, 3000);
+            });
+        }
+    }
+
+    function appendSentMessage(text) {
+        const chatMessages = document.getElementById('chat-messages');
+        const bubble = document.createElement('div');
+        bubble.className = `chat-bubble sent`;
+        const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        bubble.innerHTML = `
+            <span>${text}</span>
+            <div class="chat-meta">
+                <span class="chat-time">${timeNow}</span>
+                <i class="fa-solid fa-check tick-icon" id="tick-status"></i>
             </div>
-            <div class="auth-form-card">
-                <h2 id="auth-title">Welcome Back</h2>
-                <div class="input-group">
-                    <i class="fa-solid fa-envelope"></i>
-                    <input type="email" id="auth-email" placeholder="Your Email (must contain @)">
-                </div>
-                <div class="input-group">
-                    <i class="fa-solid fa-lock"></i>
-                    <input type="password" id="auth-password" placeholder="Password">
-                </div>
-                <button id="auth-submit-btn" class="primary-btn">Log In</button>
-                <p class="switch-auth">
-                    <span id="switch-auth-text">Don't have an account?</span> 
-                    <strong id="switch-auth-link">Sign Up</strong>
-                </p>
-            </div>
-        </div>
+        `;
+        chatMessages.appendChild(bubble);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
 
-        <!-- ================= SCREEN 1.5: EMAIL VERIFICATION ================= -->
-        <div id="verify-screen" class="screen">
-            <div class="auth-header">
-                <div class="heart-logo">✉️</div>
-                <h1>Verify Your Email</h1>
-                <p>We've sent a verification code to your email. Enter it below.</p>
-            </div>
-            <div class="auth-form-card">
-                <h2>Enter Verification Code</h2>
-                <div class="input-group">
-                    <i class="fa-solid fa-shield-halved"></i>
-                    <input type="text" id="verify-code-input" placeholder="Enter 4-digit code" maxlength="4">
-                </div>
-                <button id="verify-submit-btn" class="primary-btn">Verify & Continue</button>
-                <p class="switch-auth">Didn't receive code? <strong id="resend-code-link" style="cursor: pointer; color: #d63031;">Resend</strong></p>
-            </div>
-        </div>
+        const tickElem = bubble.querySelector('#tick-status');
+        setTimeout(() => {
+            tickElem.className = "fa-solid fa-check-double tick-icon";
+        }, 800);
+        setTimeout(() => {
+            tickElem.className = "fa-solid fa-check-double tick-icon read";
+        }, 1800);
+    }
 
-        <!-- ================= SCREEN 2: CREATE / JOIN COUPLE ================= -->
-        <div id="couple-screen" class="screen">
-            <div class="couple-header">
-                <h2>Link With Your Partner</h2>
-                <p>Create a shared space or join your partner's space using their code.</p>
-            </div>
-            <div class="couple-options">
-                <div class="couple-card">
-                    <h3>Create a Space</h3>
-                    <p>Generate a secret invite code to share with your partner.</p>
-                    <button id="create-couple-btn" class="primary-btn">Create Couple Code</button>
-                    <div id="display-code-box" class="hidden">
-                        <span>Your Code:</span> <strong id="generated-code"></strong>
-                        <button id="enter-app-from-create" class="secondary-btn" style="margin-top: 10px; width: 100%;">Enter App</button>
+    function appendReceivedMessage(text) {
+        const chatMessages = document.getElementById('chat-messages');
+        const bubble = document.createElement('div');
+        bubble.className = `chat-bubble received`;
+        const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        bubble.innerHTML = `
+            <span>${text}</span>
+            <div class="chat-meta">${timeNow}</div>
+        `;
+        chatMessages.appendChild(bubble);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // --- SCHEDULE LOGIC ---
+    function initSchedule() {
+        const scheduleList = document.getElementById('schedule-list');
+        const eventTitle = document.getElementById('event-title');
+        const eventDate = document.getElementById('event-date');
+        const addEventBtn = document.getElementById('add-event-btn');
+
+        let plans = [];
+
+        function renderPlans() {
+            scheduleList.innerHTML = '';
+            if (plans.length === 0) {
+                scheduleList.innerHTML = `<li style="font-size: 0.85rem; color: #b2bec3; text-align: center; padding: 10px;">No upcoming plans added yet</li>`;
+                return;
+            }
+            plans.forEach(plan => {
+                const li = document.createElement('li');
+                li.className = 'schedule-item';
+                li.innerHTML = `
+                    <span class="date-badge">${plan.date}</span>
+                    <div class="event-details">
+                        <strong>${plan.title}</strong>
                     </div>
-                </div>
-                <div class="divider">OR</div>
-                <div class="couple-card">
-                    <h3>Join Partner's Space</h3>
-                    <input type="text" id="join-code-input" placeholder="Enter partner's code">
-                    <button id="join-couple-btn" class="secondary-btn">Join Space</button>
-                </div>
-            </div>
-        </div>
+                `;
+                scheduleList.appendChild(li);
+            });
+        }
 
-        <!-- ================= SCREEN 3: MAIN APP ================= -->
-        <div id="app-screen" class="screen">
-            
-            <header class="app-header">
-                <h1 id="app-title-header">❤️ You & Her</h1>
-                <button id="logout-btn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
-            </header>
+        if (addEventBtn) {
+            addEventBtn.addEventListener('click', () => {
+                const titleVal = eventTitle.value.trim();
+                const dateVal = eventDate.value;
+                if (!titleVal || !dateVal) {
+                    alert('Please enter both title and date');
+                    return;
+                }
+                plans.push({ title: titleVal, date: dateVal });
+                eventTitle.value = '';
+                eventDate.value = '';
+                renderPlans();
+            });
+        }
 
-            <div class="app-content">
+        renderPlans();
+    }
 
-                <!-- TAB 1: HOME -->
-                <div id="tab-home" class="tab-pane active">
-                    <div class="card distance-card">
-                        <div class="distance-header">
-                            <i class="fa-solid fa-location-dot"></i>
-                            <span id="live-distance-num">Calculating GPS distance...</span>
-                        </div>
-                        <div class="cities" id="distance-subtext">Live distance to partner</div>
-                        <button id="update-gps-btn" class="secondary-btn" style="margin-top: 10px; font-size: 0.75rem; padding: 6px 12px; width: auto;"><i class="fa-solid fa-location-crosshairs"></i> Refresh GPS</button>
-                    </div>
-
-                    <div class="card tasks-card">
-                        <div class="card-title editable-title-container">
-                            <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                                <i class="fa-solid fa-list-check"></i>
-                                <span id="tasks-main-title" contenteditable="true" title="Click text to edit section name">BBYS TASKS</span>
-                            </div>
-                            <i class="fa-solid fa-pen edit-icon" style="font-size: 0.75rem; color: #b2bec3;"></i>
-                        </div>
-
-                        <div class="task-slot">
-                            <h4 class="slot-heading"><i class="fa-solid fa-paper-plane"></i> Assign to Partner</h4>
-                            <ul id="assigned-to-partner-list" class="task-list"></ul>
-                            <div class="add-task-row">
-                                <input type="text" id="assign-partner-input" placeholder="Give partner a task...">
-                                <button id="assign-partner-btn"><i class="fa-solid fa-plus"></i></button>
-                            </div>
-                        </div>
-
-                        <div class="task-divider"></div>
-
-                        <div class="task-slot">
-                            <h4 class="slot-heading"><i class="fa-solid fa-inbox"></i> Assigned by Partner</h4>
-                            <ul id="assigned-by-partner-list" class="task-list"></ul>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 2: CHAT -->
-                <div id="tab-chat" class="tab-pane">
-                    <div class="chat-container">
-                        <div class="chat-header-status">
-                            <span class="status-dot online" id="status-dot"></span>
-                            <span id="partner-status-text">Online</span>
-                        </div>
-
-                        <div id="chat-messages" class="chat-messages"></div>
-                        
-                        <div class="chat-input-row">
-                            <input type="text" id="chat-input" placeholder="Type a sweet message...">
-                            <button id="send-chat-btn"><i class="fa-solid fa-paper-plane"></i></button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 3: MOMENTS -->
-                <div id="tab-moments" class="tab-pane">
-                    <div class="moments-header">
-                        <h3>Our Memories</h3>
-                        <label for="photo-upload" class="upload-btn"><i class="fa-solid fa-camera"></i> Add Photo</label>
-                        <input type="file" id="photo-upload" accept="image/*" class="hidden">
-                    </div>
-                    <div id="moments-grid" class="moments-grid"></div>
-                </div>
-
-                <!-- TAB 4: SCHEDULE -->
-                <div id="tab-schedule" class="tab-pane">
-                    <div class="schedule-container">
-                        <h3>Upcoming Dates & Plans</h3>
-                        <ul id="schedule-list" class="schedule-list"></ul>
-                        <div class="add-schedule-box">
-                            <input type="text" id="event-title" placeholder="Event title...">
-                            <input type="date" id="event-date">
-                            <button id="add-event-btn" class="primary-btn">Add Plan</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- TAB 5: SETTINGS -->
-                <div id="tab-settings" class="tab-pane">
-                    <div class="settings-container">
-                        <h3>App Settings</h3>
-
-                        <!-- Dark Mode Toggle -->
-                        <div class="setting-card">
-                            <div class="setting-info">
-                                <strong>Dark Mode</strong>
-                                <p>Switch between light and dark theme</p>
-                            </div>
-                            <label class="switch">
-                                <input type="checkbox" id="dark-mode-toggle">
-                                <span class="slider round"></span>
-                            </label>
-                        </div>
-
-                        <!-- Generate / View Code from Space -->
-                        <div class="setting-card">
-                            <div class="setting-info">
-                                <strong>Couple Invite Code</strong>
-                                <p>View or generate your pairing code</p>
-                            </div>
-                            <button id="gen-code-btn" class="secondary-btn">Show / Gen Code</button>
-                        </div>
-                        <div id="in-app-code-display" class="card hidden" style="background: #ffeaa7; color: #d63031; font-weight: 600;">
-                            Your Code: <span id="displayed-space-code" style="letter-spacing: 2px;">------</span>
-                        </div>
-
-                        <!-- Logout Button -->
-                        <div class="setting-card" style="border: none; background: transparent; padding: 0;">
-                            <button id="settings-logout-btn" class="primary-btn" style="width: 100%;">Log Out</button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Bottom Navigation Bar -->
-            <nav class="bottom-nav">
-                <button class="nav-item active" data-tab="home">
-                    <i class="fa-solid fa-house"></i>
-                    <span>Home</span>
-                </button>
-                <button class="nav-item" data-tab="chat">
-                    <i class="fa-solid fa-comment"></i>
-                    <span>Chat</span>
-                </button>
-                <button class="nav-item" data-tab="moments">
-                    <i class="fa-solid fa-camera"></i>
-                    <span>Moments</span>
-                </button>
-                <button class="nav-item" data-tab="schedule">
-                    <i class="fa-solid fa-calendar"></i>
-                    <span>Schedule</span>
-                </button>
-                <button class="nav-item" data-tab="settings">
-                    <i class="fa-solid fa-gear"></i>
-                    <span>Settings</span>
-                </button>
-            </nav>
-
-        </div>
-
-    </div>
-
-    <script src="script.js"></script>
-</body>
-</html>
+    function addMomentCard(imgSrc) {
+        const momentsGrid = document.getElementById('moments-grid');
+        const card = document.createElement('div');
+        card.className = 'moment-card';
+        card.innerHTML = `<img src="${imgSrc}" alt="Moment">`;
+        momentsGrid.prepend(card);
+    }
+});
