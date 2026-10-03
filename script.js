@@ -255,18 +255,8 @@ function initCloudApp(coupleCode) {
             distanceNum.textContent = "Waiting for partner GPS...";
         }
     });
-}
 
-function calculateHaversine(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    return Math.round(R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))));
-}
-// 3. Real-time Tasks Sync
+    // 3. Real-time Tasks Sync
     const homeTaskPreviewList = document.getElementById('home-task-preview-list');
     const fullTaskList = document.getElementById('full-task-list');
     const openAddTaskBtn = document.getElementById('open-add-task-btn');
@@ -336,7 +326,8 @@ function calculateHaversine(lat1, lon1, lat2, lon2) {
             });
         });
     }
-     // 4. Real-time Plans / Timeline Sync
+
+    // 4. Real-time Plans / Timeline Sync
     const timelineContainer = document.getElementById('timeline-container');
     const openAddPlanModal = document.getElementById('open-add-plan-modal');
 
@@ -370,4 +361,15 @@ function calculateHaversine(lat1, lon1, lat2, lon2) {
                 timelineContainer.appendChild(card);
             });
         });
-    }   
+    }
+}
+
+function calculateHaversine(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    return Math.round(R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))));
+}
