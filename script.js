@@ -1,482 +1,977 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Screen Elements
-    const authScreen = document.getElementById('auth-screen');
-    const verifyScreen = document.getElementById('verify-screen');
-    const coupleScreen = document.getElementById('couple-screen');
-    const appScreen = document.getElementById('app-screen');
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+}
 
-    // Auth Elements
-    const authTitle = document.getElementById('auth-title');
-    const authSubmitBtn = document.getElementById('auth-submit-btn');
-    const switchAuthText = document.getElementById('switch-auth-text');
-    const switchAuthLink = document.getElementById('switch-auth-link');
-    const authEmail = document.getElementById('auth-email');
-    const authPassword = document.getElementById('auth-password');
-    const logoutBtn = document.getElementById('logout-btn');
+body {
+    background: #fafafa;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
-    // Verification Elements
-    const verifyCodeInput = document.getElementById('verify-code-input');
-    const verifySubmitBtn = document.getElementById('verify-submit-btn');
-    const resendCodeLink = document.getElementById('resend-code-link');
+.app-container {
+    width: 100%;
+    max-width: 390px;
+    height: 100%;
+    max-height: 844px;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
 
-    // Couple Elements
-    const createCoupleBtn = document.getElementById('create-couple-btn');
-    const displayCodeBox = document.getElementById('display-code-box');
-    const generatedCode = document.getElementById('generated-code');
-    const enterAppFromCreate = document.getElementById('enter-app-from-create');
-    const joinCodeInput = document.getElementById('join-code-input');
-    const joinCoupleBtn = document.getElementById('join-couple-btn');
-
-    // Settings / Dark Mode Elements
-    const darkModeToggle = document.getElementById('dark-mode-toggle');
-    const genCodeBtn = document.getElementById('gen-code-btn');
-    const inAppCodeDisplay = document.getElementById('in-app-code-display');
-    const displayedSpaceCode = document.getElementById('displayed-space-code');
-    const settingsLogoutBtn = document.getElementById('settings-logout-btn');
-
-    let isLoginMode = true;
-
-    // --- CHECK SAVED DARK MODE PREFERENCE ---
-    if (localStorage.getItem('dark_mode') === 'true') {
-        document.body.classList.add('dark-mode');
-        if (darkModeToggle) darkModeToggle.checked = true;
+@media (min-width: 480px) {
+    .app-container {
+        border-radius: 40px;
+        border: 8px solid #2f3640;
+        height: 844px;
     }
+}
 
-    if (darkModeToggle) {
-        darkModeToggle.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('dark_mode', 'true');
-            } else {
-                document.body.classList.remove('dark-mode');
-                localStorage.setItem('dark_mode', 'false');
-            }
-        });
-    }
+/* Screen Management */
+.screen {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    background: #fafafa;
+    overflow: hidden;
+    height: 100%;
+}
 
-    // --- AUTH TOGGLE LOGIC ---
-    switchAuthLink.addEventListener('click', () => {
-        isLoginMode = !isLoginMode;
-        if (isLoginMode) {
-            authTitle.textContent = "Welcome Back";
-            authSubmitBtn.textContent = "Log In";
-            switchAuthText.textContent = "Don't have an account?";
-            switchAuthLink.textContent = "Sign Up";
-        } else {
-            authTitle.textContent = "Create Account";
-            authSubmitBtn.textContent = "Sign Up";
-            switchAuthText.textContent = "Already have an account?";
-            switchAuthLink.textContent = "Log In";
-        }
-    });
+.screen.active {
+    display: flex;
+}
 
-    // --- AUTH SUBMIT WITH EMAIL VALIDATION ---
-    authSubmitBtn.addEventListener('click', () => {
-        const email = authEmail.value.trim();
-        const password = authPassword.value.trim();
+.hidden {
+    display: none !important;
+}
 
-        if (!email || !password) {
-            alert('Please fill in all fields');
-            return;
-        }
+/* Auth Screens */
+#auth-screen, #verify-screen, #couple-screen {
+    padding: 30px 24px;
+    justify-content: center;
+    background: linear-gradient(135deg, #fff, #ffeaa7);
+    text-align: center;
+    overflow-y: auto;
+}
 
-        if (!email.includes('@') || !email.includes('.')) {
-            alert('Please enter a valid email address containing "@" and "."');
-            return;
-        }
+.heart-logo {
+    font-size: 3.5rem;
+    margin-bottom: 10px;
+    animation: pulse 1.5s infinite;
+}
 
-        localStorage.setItem('couple_user', email);
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
 
-        if (isLoginMode) {
-            authScreen.classList.remove('active');
-            if (localStorage.getItem('paired_couple')) {
-                appScreen.classList.add('active');
-                initApp();
-            } else {
-                coupleScreen.classList.add('active');
-            }
-        } else {
-            const randomVerifyCode = Math.floor(1000 + Math.random() * 9000).toString();
-            localStorage.setItem('pending_verify_code', randomVerifyCode);
-            alert(`[Inbox Simulation] Verification code sent to ${email}:\nYour Code is: ${randomVerifyCode}`);
-            
-            authScreen.classList.remove('active');
-            verifyScreen.classList.add('active');
-        }
-    });
+.auth-header h1, .couple-header h2 {
+    color: #d63031;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
 
-    // --- EMAIL VERIFICATION SUBMIT ---
-    verifySubmitBtn.addEventListener('click', () => {
-        const code = verifyCodeInput.value.trim();
-        const expectedCode = localStorage.getItem('pending_verify_code') || '1234';
+.auth-header p, .couple-header p {
+    color: #636e72;
+    font-size: 0.9rem;
+    margin-bottom: 25px;
+}
 
-        if (!code) {
-            alert('Please enter the verification code');
-            return;
-        }
+.auth-form-card {
+    background: white;
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    text-align: left;
+    width: 100%;
+}
 
-        if (code !== expectedCode) {
-            alert('Incorrect verification code. Please check your inbox code.');
-            return;
-        }
+.auth-form-card h2 {
+    font-size: 1.2rem;
+    color: #2f3640;
+    margin-bottom: 5px;
+}
 
-        verifyScreen.classList.remove('active');
-        coupleScreen.classList.add('active');
-    });
+.input-group {
+    display: flex;
+    align-items: center;
+    background: #f1f2f6;
+    border-radius: 12px;
+    padding: 0 12px;
+    border: 1px solid #dfe4ea;
+}
 
-    resendCodeLink.addEventListener('click', () => {
-        const resendCode = localStorage.getItem('pending_verify_code') || '1234';
-        alert(`[Inbox Simulation] Resent verification code: ${resendCode}`);
-    });
+.input-group i {
+    color: #b2bec3;
+    margin-right: 10px;
+}
 
-    // --- CREATE / JOIN COUPLE ---
-    createCoupleBtn.addEventListener('click', () => {
-        let activeCode = localStorage.getItem('couple_space_code');
-        if (!activeCode) {
-            activeCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-            localStorage.setItem('couple_space_code', activeCode);
-        }
-        generatedCode.textContent = activeCode;
-        displayCodeBox.classList.remove('hidden');
-    });
+.input-group input {
+    width: 100%;
+    padding: 12px 0;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-size: 0.9rem;
+    color: #2f3640;
+}
 
-    enterAppFromCreate.addEventListener('click', () => {
-        localStorage.setItem('paired_couple', 'true');
-        coupleScreen.classList.remove('active');
-        appScreen.classList.add('active');
-        initApp();
-    });
+.primary-btn {
+    background: linear-gradient(135deg, #ff7675, #d63031);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: opacity 0.2s;
+}
 
-    joinCoupleBtn.addEventListener('click', () => {
-        const enteredCode = joinCodeInput.value.trim().toUpperCase();
-        const storedCode = localStorage.getItem('couple_space_code');
+.primary-btn:hover {
+    opacity: 0.9;
+}
 
-        if (!enteredCode) {
-            alert('Please enter the couple code provided by your partner.');
-            return;
-        }
+.secondary-btn {
+    background: #2f3640;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
 
-        if (storedCode && enteredCode === storedCode) {
-            localStorage.setItem('paired_couple', 'true');
-            coupleScreen.classList.remove('active');
-            appScreen.classList.add('active');
-            initApp();
-        } else if (!storedCode) {
-            localStorage.setItem('couple_space_code', enteredCode);
-            localStorage.setItem('paired_couple', 'true');
-            coupleScreen.classList.remove('active');
-            appScreen.classList.add('active');
-            initApp();
-        } else {
-            alert('Invalid couple code. Please check the code with your partner.');
-        }
-    });
+.switch-auth {
+    font-size: 0.8rem;
+    text-align: center;
+    color: #636e72;
+}
 
-    // --- LOGOUT HANDLERS ---
-    function performLogout() {
-        localStorage.removeItem('couple_user');
-        localStorage.removeItem('paired_couple');
-        appScreen.classList.remove('active');
-        authScreen.classList.add('active');
-    }
+.switch-auth strong {
+    color: #d63031;
+    font-weight: 600;
+    cursor: pointer;
+}
 
-    logoutBtn.addEventListener('click', performLogout);
-    if (settingsLogoutBtn) settingsLogoutBtn.addEventListener('click', performLogout);
+.divider {
+    font-weight: 600;
+    color: #b2bec3;
+    font-size: 0.85rem;
+    margin: 15px 0;
+}
 
-    // --- IN-APP CODE GENERATION / DISPLAY HANDLER ---
-    if (genCodeBtn) {
-        genCodeBtn.addEventListener('click', () => {
-            let activeCode = localStorage.getItem('couple_space_code');
-            if (!activeCode) {
-                activeCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-                localStorage.setItem('couple_space_code', activeCode);
-            }
-            displayedSpaceCode.textContent = activeCode;
-            inAppCodeDisplay.classList.remove('hidden');
-        });
-    }
+.couple-options {
+    background: white;
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-    // --- MAIN APP FUNCTIONALITY ---
-    function initApp() {
-        const navItems = document.querySelectorAll('.bottom-nav .nav-item');
-        const tabPanes = document.querySelectorAll('.tab-pane');
+/* Main App Layout */
+.app-content {
+    flex: 1;
+    overflow-y: auto;
+    background: #fafafa;
+    position: relative;
+}
 
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                navItems.forEach(nav => nav.classList.remove('active'));
-                tabPanes.forEach(pane => pane.classList.remove('active'));
+.tab-pane {
+    display: none;
+    padding: 16px;
+    flex-direction: column;
+    gap: 14px;
+}
 
-                item.classList.add('active');
-                const targetTab = document.getElementById(`tab-${item.dataset.tab}`);
-                if (targetTab) targetTab.classList.add('active');
-            });
-        });
+.tab-pane.active {
+    display: flex;
+}
 
-        initLiveDistance();
-        initTasks();
-        initChat();
-        initSchedule();
+/* Design System Cards */
+.card {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    border: 1px solid #f1f2f6;
+}
 
-        const photoUpload = document.getElementById('photo-upload');
-        photoUpload.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    addMomentCard(event.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
+/* Home Top Bar */
+.home-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
 
-    // --- TWO-WAY LIVE GPS DISTANCE TRACKING ---
-    function initLiveDistance() {
-        const distanceNum = document.getElementById('live-distance-num');
-        const distanceSubtext = document.getElementById('distance-subtext');
-        const updateGpsBtn = document.getElementById('update-gps-btn');
+.home-top-bar h1 {
+    font-size: 1.2rem;
+    color: #d63031;
+    font-weight: 600;
+}
 
-        const currentUser = localStorage.getItem('couple_user') || 'user1';
-        const isUserOne = currentUser.includes('1') || !localStorage.getItem('user_role');
-        const myLocationKey = isUserOne ? 'user_a_loc' : 'user_b_loc';
-        const partnerLocationKey = isUserOne ? 'user_b_loc' : 'user_a_loc';
+.home-top-icons {
+    display: flex;
+    gap: 10px;
+}
 
-        function updateAndCalculateDistance() {
-            if (!navigator.geolocation) {
-                distanceNum.textContent = "GPS not supported";
-                return;
-            }
+.icon-btn {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #718093;
+    cursor: pointer;
+    padding: 4px;
+}
 
-            distanceNum.textContent = "Fetching GPS...";
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const myLat = position.coords.latitude;
-                    const myLon = position.coords.longitude;
+/* Distance Card */
+.distance-card {
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
 
-                    localStorage.setItem(myLocationKey, JSON.stringify({ lat: myLat, lon: myLon }));
-                    const partnerData = localStorage.getItem(partnerLocationKey);
+.distance-card:active {
+    transform: scale(0.98);
+}
 
-                    if (partnerData) {
-                        const partnerCoord = JSON.parse(partnerData);
-                        const dist = calculateHaversine(myLat, myLon, partnerCoord.lat, partnerCoord.lon);
-                        distanceNum.textContent = `${dist} km`;
-                        distanceSubtext.textContent = `Live GPS Distance Between You & Partner`;
-                    } else {
-                        const defaultPartnerLat = 23.2599;
-                        const defaultPartnerLon = 77.4126;
-                        const dist = calculateHaversine(myLat, myLon, defaultPartnerLat, defaultPartnerLon);
-                        distanceNum.textContent = `${dist} km`;
-                        distanceSubtext.textContent = `Live GPS (Partner location waiting for sync)`;
-                    }
-                },
-                (error) => {
-                    distanceNum.textContent = "GPS Permission Denied";
-                    distanceSubtext.textContent = "Enable location services in browser";
-                },
-                { enableHighAccuracy: true, timeout: 10000 }
-            );
-        }
+.distance-header {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #2f3640;
+    margin-bottom: 4px;
+}
 
-        updateAndCalculateDistance();
-        if (updateGpsBtn) updateGpsBtn.addEventListener('click', updateAndCalculateDistance);
-        setInterval(updateAndCalculateDistance, 10000);
-    }
+.cities {
+    font-size: 0.9rem;
+    color: #718093;
+    font-weight: 500;
+}
 
-    function calculateHaversine(lat1, lon1, lat2, lon2) {
-        const R = 6371;
-        const dLat = (lat2 - lat1) * Math.PI / 180;
-        const dLon = (lon2 - lon1) * Math.PI / 180;
-        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                  Math.sin(dLon/2) * Math.sin(dLon/2);
-        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        return Math.round(R * c);
-    }
+.updated-time {
+    font-size: 0.75rem;
+    color: #b2bec3;
+    margin-top: 4px;
+}
 
-    // --- DUAL-SLOT TASKS LOGIC ---
-    function initTasks() {
-        const assignedToPartnerList = document.getElementById('assigned-to-partner-list');
-        const assignedByPartnerList = document.getElementById('assigned-by-partner-list');
-        const assignPartnerInput = document.getElementById('assign-partner-input');
-        const assignPartnerBtn = document.getElementById('assign-partner-btn');
+/* Countdown Card */
+.countdown-card {
+    background: linear-gradient(135deg, #ff7675, #d63031);
+    color: white;
+    text-align: center;
+    cursor: pointer;
+}
 
-        let tasksToPartner = [];
-        let tasksByPartner = [];
+.countdown-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    opacity: 0.9;
+    margin-bottom: 6px;
+}
 
-        function renderTasks() {
-            assignedToPartnerList.innerHTML = '';
-            if (tasksToPartner.length === 0) {
-                assignedToPartnerList.innerHTML = `<li style="font-size: 0.8rem; color: #b2bec3; text-align: center; padding: 4px;">No tasks assigned yet</li>`;
-            } else {
-                tasksToPartner.forEach((task, index) => {
-                    const li = document.createElement('li');
-                    li.className = `task-item ${task.completed ? 'completed' : ''}`;
-                    li.innerHTML = `
-                        <span>${task.text}</span>
-                        <input type="checkbox" ${task.completed ? 'checked' : ''}>
-                    `;
-                    li.querySelector('input').addEventListener('change', (e) => {
-                        tasksToPartner[index].completed = e.target.checked;
-                        renderTasks();
-                    });
-                    assignedToPartnerList.appendChild(li);
-                });
-            }
+.countdown-days {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+}
 
-            assignedByPartnerList.innerHTML = '';
-            if (tasksByPartner.length === 0) {
-                assignedByPartnerList.innerHTML = `<li style="font-size: 0.8rem; color: #b2bec3; text-align: center; padding: 4px;">No tasks from partner yet</li>`;
-            } else {
-                tasksByPartner.forEach((task, index) => {
-                    const li = document.createElement('li');
-                    li.className = `task-item ${task.completed ? 'completed' : ''}`;
-                    li.innerHTML = `
-                        <span>${task.text}</span>
-                        <input type="checkbox" ${task.completed ? 'checked' : ''}>
-                    `;
-                    li.querySelector('input').addEventListener('change', (e) => {
-                        tasksByPartner[index].completed = e.target.checked;
-                        renderTasks();
-                    });
-                    assignedByPartnerList.appendChild(li);
-                });
-            }
-        }
+.countdown-label {
+    font-size: 0.85rem;
+    opacity: 0.95;
+}
 
-        if (assignPartnerBtn) {
-            assignPartnerBtn.addEventListener('click', () => {
-                const val = assignPartnerInput.value.trim();
-                if (!val) return;
-                tasksToPartner.push({ text: val, completed: false });
-                assignPartnerInput.value = '';
-                renderTasks();
-            });
-        }
+/* Tasks Preview */
+.tasks-card {
+    text-align: left;
+}
 
-        renderTasks();
-    }
+.card-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #2f3640;
+    margin-bottom: 10px;
+}
 
-    // --- CHAT LOGIC ---
-    function initChat() {
-        const chatMessages = document.getElementById('chat-messages');
-        const chatInput = document.getElementById('chat-input');
-        const sendChatBtn = document.getElementById('send-chat-btn');
-        const partnerStatusText = document.getElementById('partner-status-text');
-        const statusDot = document.getElementById('status-dot');
+.text-link {
+    background: none;
+    border: none;
+    color: #d63031;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
 
-        chatMessages.innerHTML = '';
+.task-preview-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
 
-        if (sendChatBtn) {
-            sendChatBtn.addEventListener('click', () => {
-                const text = chatInput.value.trim();
-                if (!text) return;
-                
-                appendSentMessage(text);
-                chatInput.value = '';
+.task-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: #2f3640;
+}
 
-                setTimeout(() => {
-                    partnerStatusText.textContent = "typing...";
-                    statusDot.classList.add('online');
-                }, 800);
+.task-item.completed span {
+    text-decoration: line-through;
+    color: #b2bec3;
+}
 
-                setTimeout(() => {
-                    partnerStatusText.textContent = "Online";
-                    appendReceivedMessage("Got your message! ❤️");
-                }, 3000);
-            });
-        }
-    }
+.task-item input[type="checkbox"] {
+    accent-color: #d63031;
+    width: 16px;
+    height: 16px;
+}
 
-    function appendSentMessage(text) {
-        const chatMessages = document.getElementById('chat-messages');
-        const bubble = document.createElement('div');
-        bubble.className = `chat-bubble sent`;
-        const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+/* Next Plan & Last Message Cards */
+.next-plan-card, .last-message-card {
+    cursor: pointer;
+}
 
-        bubble.innerHTML = `
-            <span>${text}</span>
-            <div class="chat-meta">
-                <span class="chat-time">${timeNow}</span>
-                <i class="fa-solid fa-check tick-icon" id="tick-status"></i>
-            </div>
-        `;
-        chatMessages.appendChild(bubble);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+.next-plan-details strong {
+    font-size: 0.9rem;
+    color: #2f3640;
+}
 
-        const tickElem = bubble.querySelector('#tick-status');
-        setTimeout(() => {
-            tickElem.className = "fa-solid fa-check-double tick-icon";
-        }, 800);
-        setTimeout(() => {
-            tickElem.className = "fa-solid fa-check-double tick-icon read";
-        }, 1800);
-    }
+.next-plan-details p {
+    font-size: 0.75rem;
+    color: #718093;
+}
 
-    function appendReceivedMessage(text) {
-        const chatMessages = document.getElementById('chat-messages');
-        const bubble = document.createElement('div');
-        bubble.className = `chat-bubble received`;
-        const timeNow = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+.last-msg-text {
+    font-size: 0.9rem;
+    color: #636e72;
+    font-style: italic;
+}
 
-        bubble.innerHTML = `
-            <span>${text}</span>
-            <div class="chat-meta">${timeNow}</div>
-        `;
-        chatMessages.appendChild(bubble);
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
+/* Chat Tab */
+.chat-top-bar {
+    padding: 12px 16px;
+    background: #fff;
+    border-bottom: 1px solid #f1f2f6;
+    display: flex;
+    align-items: center;
+}
 
-    // --- SCHEDULE LOGIC ---
-    function initSchedule() {
-        const scheduleList = document.getElementById('schedule-list');
-        const eventTitle = document.getElementById('event-title');
-        const eventDate = document.getElementById('event-date');
-        const addEventBtn = document.getElementById('add-event-btn');
+.chat-partner-info {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+}
 
-        let plans = [];
+.chat-partner-info strong {
+    font-size: 0.95rem;
+    color: #2f3640;
+}
 
-        function renderPlans() {
-            scheduleList.innerHTML = '';
-            if (plans.length === 0) {
-                scheduleList.innerHTML = `<li style="font-size: 0.85rem; color: #b2bec3; text-align: center; padding: 10px;">No upcoming plans added yet</li>`;
-                return;
-            }
-            plans.forEach(plan => {
-                const li = document.createElement('li');
-                li.className = 'schedule-item';
-                li.innerHTML = `
-                    <span class="date-badge">${plan.date}</span>
-                    <div class="event-details">
-                        <strong>${plan.title}</strong>
-                    </div>
-                `;
-                scheduleList.appendChild(li);
-            });
-        }
+.online-status {
+    font-size: 0.7rem;
+    color: #00b894;
+}
 
-        if (addEventBtn) {
-            addEventBtn.addEventListener('click', () => {
-                const titleVal = eventTitle.value.trim();
-                const dateVal = eventDate.value;
-                if (!titleVal || !dateVal) {
-                    alert('Please enter both title and date');
-                    return;
-                }
-                plans.push({ title: titleVal, date: dateVal });
-                eventTitle.value = '';
-                eventDate.value = '';
-                renderPlans();
-            });
-        }
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
 
-        renderPlans();
-    }
+.chat-timestamp-badge {
+    align-self: center;
+    font-size: 0.65rem;
+    color: #b2bec3;
+    background: #f1f2f6;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin: 6px 0;
+}
 
-    function addMomentCard(imgSrc) {
-        const momentsGrid = document.getElementById('moments-grid');
-        const card = document.createElement('div');
-        card.className = 'moment-card';
-        card.innerHTML = `<img src="${imgSrc}" alt="Moment">`;
-        momentsGrid.prepend(card);
-    }
-});
+.chat-bubble {
+    max-width: 75%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.chat-bubble.sent {
+    background: #d63031;
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+
+.chat-bubble.received {
+    background: #ffffff;
+    color: #2f3640;
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+    border: 1px solid #f1f2f6;
+}
+
+.chat-input-area {
+    padding: 10px 16px;
+    background: #fff;
+    border-top: 1px solid #f1f2f6;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.chat-action-btn, .chat-send-btn {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #718093;
+    cursor: pointer;
+}
+
+.chat-send-btn {
+    color: #d63031;
+}
+
+.chat-input-area input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #dfe4ea;
+    border-radius: 20px;
+    outline: none;
+    font-size: 0.85rem;
+}
+
+/* Moments Tab */
+.moments-header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.moments-header h2 {
+    font-size: 1.2rem;
+    color: #2f3640;
+}
+
+.moments-subtabs, .task-subtabs {
+    display: flex;
+    background: #f1f2f6;
+    border-radius: 10px;
+    padding: 3px;
+}
+
+.subtab-btn, .task-subtab {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #718093;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.subtab-btn.active, .task-subtab.active {
+    background: #ffffff;
+    color: #2f3640;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.subtab-pane {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.subtab-pane.active {
+    display: flex;
+}
+
+.random-selfie-card {
+    text-align: center;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #fff, #ffeaa7);
+}
+
+.random-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #d63031;
+    margin-bottom: 10px;
+}
+
+.random-prompt {
+    font-size: 1rem;
+    color: #2f3640;
+    font-weight: 500;
+}
+
+.memories-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.memory-cell {
+    aspect-ratio: 1;
+    background: #e2e8f0;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #a0aec0;
+    font-size: 1.2rem;
+}
+
+.add-memory-cell {
+    background: #edf2f7;
+    flex-direction: column;
+    font-size: 0.8rem;
+    color: #718093;
+    cursor: pointer;
+    gap: 2px;
+}
+
+/* Plans Tab */
+.plans-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.plans-header h2 {
+    font-size: 1.2rem;
+    color: #2f3640;
+}
+
+.timeline-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.timeline-group-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #b2bec3;
+    margin-top: 10px;
+    letter-spacing: 1px;
+}
+
+.timeline-card {
+    background: #ffffff;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border-left: 4px solid #d63031;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+.timeline-card strong {
+    font-size: 0.9rem;
+    color: #2f3640;
+}
+
+.timeline-card p {
+    font-size: 0.75rem;
+    color: #718093;
+}
+
+/* Us Tab */
+.us-profile-header {
+    text-align: center;
+    padding: 10px 0;
+}
+
+.us-heart-badge {
+    font-size: 2.5rem;
+    margin-bottom: 4px;
+}
+
+.us-profile-header h2 {
+    font-size: 1.2rem;
+    color: #2f3640;
+}
+
+.us-profile-header p {
+    font-size: 0.8rem;
+    color: #718093;
+}
+
+.us-menu-list {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    border: 1px solid #f1f2f6;
+}
+
+.us-menu-item {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #2f3640;
+    border-bottom: 1px solid #f1f2f6;
+    cursor: pointer;
+}
+
+.us-menu-item:last-child {
+    border-bottom: none;
+}
+
+.us-menu-item span {
+    flex: 1;
+    margin-left: 10px;
+}
+
+.us-menu-item i {
+    color: #b2bec3;
+    font-size: 0.8rem;
+}
+
+.us-menu-item.danger {
+    color: #d63031;
+    justify-content: center;
+    font-weight: 600;
+}
+
+/* Modals & Bottom Sheets */
+.modal-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.modal-content {
+    background: #fafafa;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.modal-header h2 {
+    font-size: 1.1rem;
+    color: #2f3640;
+}
+
+.bottom-sheet {
+    background: white;
+    padding: 24px;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.bottom-sheet h3 {
+    font-size: 1.1rem;
+    color: #2f3640;
+    text-align: center;
+}
+
+.sheet-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+}
+
+.sheet-group label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #718093;
+}
+
+.sheet-group input, .sheet-group select {
+    padding: 10px;
+    border: 1px solid #dfe4ea;
+    border-radius: 10px;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+/* Task Modal specific */
+.task-progress-banner {
+    background: #ffeaa7;
+    color: #d63031;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.full-task-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+}
+
+/* Distance Modal specific */
+.distance-detail-card {
+    background: white;
+    padding: 24px;
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    text-align: center;
+}
+
+.big-pin {
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+}
+
+.big-distance {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2f3640;
+    margin-bottom: 15px;
+}
+
+.locations-row {
+    display: flex;
+    justify-content: space-around;
+    font-size: 0.9rem;
+    color: #718093;
+}
+
+.locations-row strong {
+    color: #2f3640;
+}
+
+.privacy-notice {
+    font-size: 0.75rem;
+    color: #b2bec3;
+    text-align: center;
+    margin-top: 15px;
+}
+
+/* Notifications List */
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notif-item {
+    background: white;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    color: #2f3640;
+    border-left: 4px solid #ff7675;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+/* Settings Sub-modal */
+.settings-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.setting-group-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #b2bec3;
+    letter-spacing: 1px;
+    margin-top: 5px;
+}
+
+.setting-row {
+    background: white;
+    padding: 12px 16px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    color: #2f3640;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.danger-row {
+    color: #d63031;
+    font-weight: 600;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
+}
+
+.switch input { opacity: 0; width: 0; height: 0; }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 22px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider { background-color: #d63031; }
+input:checked + .slider:before { transform: translateX(22px); }
+
+/* Fixed Bottom Navigation Bar (5 Items) */
+.bottom-nav {
+    height: 65px;
+    background: #ffffff;
+    border-top: 1px solid #f1f2f6;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 5px;
+}
+
+.nav-item {
+    background: none;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    color: #b2bec3;
+    cursor: pointer;
+    font-size: 0.7rem;
+    flex: 1;
+    transition: color 0.2s ease;
+}
+
+.nav-item i {
+    font-size: 1.1rem;
+}
+
+.nav-item.active {
+    color: #d63031;
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    background: #121212 !important;
+}
+
+body.dark-mode .app-container {
+    background: #121212 !important;
+    color: #f1f2f6;
+}
+
+body.dark-mode .card,
+body.dark-mode .auth-form-card,
+body.dark-mode .couple-options,
+body.dark-mode .chat-top-bar,
+body.dark-mode .chat-input-area,
+body.dark-mode .modal-content,
+body.dark-mode .bottom-sheet,
+body.dark-mode .distance-detail-card,
+body.dark-mode .notif-item,
+body.dark-mode .setting-row,
+body.dark-mode .us-menu-list,
+body.dark-mode .bottom-nav,
+body.dark-mode .timeline-card {
+    background: #1e1e1e !important;
+    border-color: #2d3436 !important;
+    color: #f1f2f6 !important;
+}
+
+body.dark-mode .home-top-bar h1,
+body.dark-mode .distance-header,
+body.dark-mode .card-title-row span,
+body.dark-mode .us-profile-header h2,
+body.dark-mode .modal-header h2,
+body.dark-mode .bottom-sheet h3 {
+    color: #ff7675 !important;
+}
+
+body.dark-mode .cities,
+body.dark-mode .updated-time,
+body.dark-mode .us-profile-header p,
+body.dark-mode .next-plan-details p,
+body.dark-mode .timeline-card p {
+    color: #b2bec3 !important;
+}
+
+body.dark-mode input, body.dark-mode select {
+    background: #2d3436 !important;
+    color: #fff !important;
+    border-color: #4b6584 !important;
+}
+
+body.dark-mode .chat-bubble.received,
+body.dark-mode .task-item {
+    background: #2d3436 !important;
+    color: #f1f2f6 !important;
+}
+
+body.dark-mode .subtab-btn.active, body.dark-mode .task-subtab.active {
+    background: #2d3436 !important;
+    color: #fff !important;
+}
