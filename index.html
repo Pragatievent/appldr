@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Couple App - You & Her</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- ================= SCREEN 1: LOGIN / SIGNUP ================= -->
+        <div id="auth-screen" class="screen active">
+            <div class="auth-header">
+                <div class="heart-logo">❤️</div>
+                <h1>COUPLE APP</h1>
+                <p>Stay close, no matter the distance.</p>
+            </div>
+            <div class="auth-form-card">
+                <h2 id="auth-title">Welcome Back</h2>
+                <div class="input-group">
+                    <i class="fa-solid fa-envelope"></i>
+                    <input type="email" id="auth-email" placeholder="Your Email (must contain @)">
+                </div>
+                <div class="input-group">
+                    <i class="fa-solid fa-lock"></i>
+                    <input type="password" id="auth-password" placeholder="Password">
+                </div>
+                <button id="auth-submit-btn" class="primary-btn">Log In</button>
+                <p class="switch-auth">
+                    <span id="switch-auth-text">Don't have an account?</span> 
+                    <strong id="switch-auth-link">Sign Up</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- ================= SCREEN 1.5: EMAIL VERIFICATION ================= -->
+        <div id="verify-screen" class="screen">
+            <div class="auth-header">
+                <div class="heart-logo">✉️</div>
+                <h1>Verify Your Email</h1>
+                <p>We've sent a verification code to your email. Enter it below.</p>
+            </div>
+            <div class="auth-form-card">
+                <h2>Enter Verification Code</h2>
+                <div class="input-group">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <input type="text" id="verify-code-input" placeholder="Enter 4-digit code" maxlength="4">
+                </div>
+                <button id="verify-submit-btn" class="primary-btn">Verify & Continue</button>
+                <p class="switch-auth">Didn't receive code? <strong id="resend-code-link" style="cursor: pointer; color: #d63031;">Resend</strong></p>
+            </div>
+        </div>
+
+        <!-- ================= SCREEN 2: CREATE / JOIN COUPLE ================= -->
+        <div id="couple-screen" class="screen">
+            <div class="couple-header">
+                <h2>Link With Your Partner</h2>
+                <p>Create a shared space or join your partner's space using their code.</p>
+            </div>
+            <div class="couple-options">
+                <div class="couple-card">
+                    <h3>Create a Space</h3>
+                    <p>Generate a secret invite code to share with your partner.</p>
+                    <button id="create-couple-btn" class="primary-btn">Create Couple Code</button>
+                    <div id="display-code-box" class="hidden">
+                        <span>Your Code:</span> <strong id="generated-code"></strong>
+                        <button id="enter-app-from-create" class="secondary-btn" style="margin-top: 10px; width: 100%;">Enter App</button>
+                    </div>
+                </div>
+                <div class="divider">OR</div>
+                <div class="couple-card">
+                    <h3>Join Partner's Space</h3>
+                    <input type="text" id="join-code-input" placeholder="Enter partner's code">
+                    <button id="join-couple-btn" class="secondary-btn">Join Space</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= SCREEN 3: MAIN APP ================= -->
+        <div id="app-screen" class="screen">
+            
+            <header class="app-header">
+                <h1 id="app-title-header">❤️ You & Her</h1>
+                <button id="logout-btn" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+            </header>
+
+            <div class="app-content">
+
+                <!-- TAB 1: HOME -->
+                <div id="tab-home" class="tab-pane active">
+                    <div class="card distance-card">
+                        <div class="distance-header">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <span id="live-distance-num">Calculating GPS distance...</span>
+                        </div>
+                        <div class="cities" id="distance-subtext">Live distance to partner</div>
+                        <button id="update-gps-btn" class="secondary-btn" style="margin-top: 10px; font-size: 0.75rem; padding: 6px 12px; width: auto;"><i class="fa-solid fa-location-crosshairs"></i> Refresh GPS</button>
+                    </div>
+
+                    <div class="card tasks-card">
+                        <div class="card-title editable-title-container">
+                            <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                                <i class="fa-solid fa-list-check"></i>
+                                <span id="tasks-main-title" contenteditable="true" title="Click text to edit section name">BBYS TASKS</span>
+                            </div>
+                            <i class="fa-solid fa-pen edit-icon" style="font-size: 0.75rem; color: #b2bec3;"></i>
+                        </div>
+
+                        <div class="task-slot">
+                            <h4 class="slot-heading"><i class="fa-solid fa-paper-plane"></i> Assign to Partner</h4>
+                            <ul id="assigned-to-partner-list" class="task-list"></ul>
+                            <div class="add-task-row">
+                                <input type="text" id="assign-partner-input" placeholder="Give partner a task...">
+                                <button id="assign-partner-btn"><i class="fa-solid fa-plus"></i></button>
+                            </div>
+                        </div>
+
+                        <div class="task-divider"></div>
+
+                        <div class="task-slot">
+                            <h4 class="slot-heading"><i class="fa-solid fa-inbox"></i> Assigned by Partner</h4>
+                            <ul id="assigned-by-partner-list" class="task-list"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: CHAT -->
+                <div id="tab-chat" class="tab-pane">
+                    <div class="chat-container">
+                        <div class="chat-header-status">
+                            <span class="status-dot online" id="status-dot"></span>
+                            <span id="partner-status-text">Online</span>
+                        </div>
+
+                        <div id="chat-messages" class="chat-messages">
+                            <!-- Clean state, no demo text -->
+                        </div>
+                        
+                        <div class="chat-input-row">
+                            <input type="text" id="chat-input" placeholder="Type a sweet message...">
+                            <button id="send-chat-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: MOMENTS -->
+                <div id="tab-moments" class="tab-pane">
+                    <div class="moments-header">
+                        <h3>Our Memories</h3>
+                        <label for="photo-upload" class="upload-btn"><i class="fa-solid fa-camera"></i> Add Photo</label>
+                        <input type="file" id="photo-upload" accept="image/*" class="hidden">
+                    </div>
+                    <div id="moments-grid" class="moments-grid"></div>
+                </div>
+
+                <!-- TAB 4: SCHEDULE -->
+                <div id="tab-schedule" class="tab-pane">
+                    <div class="schedule-container">
+                        <h3>Upcoming Dates & Plans</h3>
+                        <ul id="schedule-list" class="schedule-list">
+                            <!-- Clean state -->
+                        </ul>
+                        <div class="add-schedule-box">
+                            <input type="text" id="event-title" placeholder="Event title...">
+                            <input type="date" id="event-date">
+                            <button id="add-event-btn" class="primary-btn">Add Plan</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Navigation Bar -->
+            <nav class="bottom-nav">
+                <button class="nav-item active" data-tab="home">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Home</span>
+                </button>
+                <button class="nav-item" data-tab="chat">
+                    <i class="fa-solid fa-comment"></i>
+                    <span>Chat</span>
+                </button>
+                <button class="nav-item" data-tab="moments">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>Moments</span>
+                </button>
+                <button class="nav-item" data-tab="schedule">
+                    <i class="fa-solid fa-calendar"></i>
+                    <span>Schedule</span>
+                </button>
+            </nav>
+
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
