@@ -181,7 +181,7 @@ if (logoutBtn) {
     });
 }
 
-// --- IMAGE COMPRESSION HELPER (Prevents Firestore 1MB limits & disappearance) ---
+// --- IMAGE COMPRESSION HELPER ---
 function compressImage(file, callback) {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -437,7 +437,15 @@ function initCloudApp(coupleCode) {
                 if (msg.image) {
                     const img = document.createElement('img');
                     img.src = msg.image;
-                    img.style.cssText = "max-width: 160px; border-radius: 8px; margin-top: 5px; display: block;";
+                    img.style.cssText = "max-width: 160px; border-radius: 8px; margin-top: 5px; display: block; cursor: pointer;";
+                    img.addEventListener('click', () => {
+                        const imageModal = document.getElementById('image-modal');
+                        const modalImageView = document.getElementById('modal-image-view');
+                        if (modalImageView && imageModal) {
+                            modalImageView.src = msg.image;
+                            imageModal.classList.remove('hidden');
+                        }
+                    });
                     bubble.appendChild(img);
                 }
                 chatMessages.appendChild(bubble);
@@ -654,7 +662,7 @@ function initCloudApp(coupleCode) {
         closeDistanceModal.addEventListener('click', () => distanceModal.classList.add('hidden'));
     }
 
-// 6. Real-time Memories & Selfie Gallery Sync (Compressed, Saved & Full-Screen View)
+    // 6. Real-time Memories & Selfie Gallery Sync (Lightbox View)
     const memoriesGrid = document.querySelector('.memories-grid');
     const imageModal = document.getElementById('image-modal');
     const modalImageView = document.getElementById('modal-image-view');
@@ -692,7 +700,6 @@ function initCloudApp(coupleCode) {
     const setupMemoryUploadTriggers = () => {
         const uploadTriggers = document.querySelectorAll('#open-add-memory-btn, #upload-device-photo-btn');
         uploadTriggers.forEach(btn => {
-            // Prevent duplicate bindings
             const newBtn = btn.cloneNode(true);
             btn.parentNode.replaceChild(newBtn, btn);
 
@@ -733,7 +740,6 @@ function initCloudApp(coupleCode) {
                 cell.style.backgroundPosition = 'center';
                 cell.style.cursor = 'pointer';
 
-                // Open photo in full-screen modal when clicked
                 cell.addEventListener('click', () => {
                     if (modalImageView && imageModal) {
                         modalImageView.src = mem.image;
@@ -747,3 +753,14 @@ function initCloudApp(coupleCode) {
             setupMemoryUploadTriggers();
         });
     }
+}
+
+function calculateHaversine(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    return Math.round(R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))));
+}
