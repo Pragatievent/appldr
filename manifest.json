@@ -1,15 +1,18 @@
 {
   "name": "Cloud Couple App",
   "short_name": "CoupleApp",
-  "start_url": "/",
+  "start_url": "/appldr/",
+  "scope": "/appldr/",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#ff4757",
+  "description": "A real-time shared space and private app for couples",
   "icons": [
     {
       "src": "https://img.icons8.com/color/512/love-circled.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
