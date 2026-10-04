@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.pragatievent.twa",
+        "sha256_cert_fingerprints": ["18:38:EF:39:0A:77:6B:2B:9E:BC:A9:4C:1B:42:A4:5A:00:17:5C:9E:81:36:E3:54:13:05:F6:E8:B9:2F:63:D4"]
+      }
+    }]
