@@ -251,52 +251,92 @@ function initCloudApp(coupleCode) {
         });
     }
 
-    // --- B. "Our Story" Cloud Sync ---
+    // --- B. "Our Story" Custom Modal Sync ---
     const menuOurStory = document.getElementById('menu-our-story');
-    if (menuOurStory) {
+    const storyModal = document.getElementById('story-modal');
+    const closeStoryModal = document.getElementById('close-story-modal');
+    const storyTextarea = document.getElementById('story-textarea');
+    const saveStoryBtn = document.getElementById('save-story-btn');
+
+    if (menuOurStory && storyModal) {
         menuOurStory.addEventListener('click', async () => {
             const coupleRef = doc(db, "couples", coupleCode);
             const docSnap = await getDoc(coupleRef);
-            const currentStory = docSnap.exists() ? (docSnap.data().ourStory || "No story added yet. Tell your story here!") : "";
-            
-            const newStory = prompt("📖 Edit 'Our Story' (How you met, special memories):", currentStory);
-            if (newStory !== null) {
-                await updateDoc(coupleRef, { ourStory: newStory });
-                alert("✨ Our Story saved to your cloud space!");
+            if (docSnap.exists()) {
+                storyTextarea.value = docSnap.data().ourStory || "";
             }
+            storyModal.classList.remove('hidden');
         });
     }
 
-    // --- C. Important Dates Cloud Sync ---
+    if (closeStoryModal && storyModal) {
+        closeStoryModal.addEventListener('click', () => storyModal.classList.add('hidden'));
+    }
+
+    if (saveStoryBtn) {
+        saveStoryBtn.addEventListener('click', async () => {
+            const newStory = storyTextarea.value.trim();
+            const coupleRef = doc(db, "couples", coupleCode);
+            await updateDoc(coupleRef, { ourStory: newStory });
+            alert("✨ Our Story saved successfully!");
+            storyModal.classList.add('hidden');
+        });
+    }
+
+    // --- C. Important Dates Custom Modal Sync ---
     const menuDates = document.getElementById('menu-dates');
-    if (menuDates) {
-        menuDates.addEventListener('click', async () => {
-            const action = prompt("🎂 Important Dates:\nType '1' to Add a new date\nType '2' to View saved dates:");
-            if (action === '1') {
-                const title = prompt("Enter event name (e.g., First Date, Anniversary):");
-                const dateVal = prompt("Enter date (e.g., October 15):");
-                if (title && dateVal) {
-                    await addDoc(collection(db, "couples", coupleCode, "importantDates"), {
-                        title: title,
-                        date: dateVal,
-                        createdAt: new Date()
-                    });
-                    alert("🎉 Important date added successfully!");
-                }
-            } else if (action === '2') {
-                const datesQuery = query(collection(db, "couples", coupleCode, "importantDates"), orderBy("createdAt", "asc"));
-                const snapshot = await getDocs(datesQuery);
-                let listText = "🗓 Saved Important Dates:\n\n";
-                if (snapshot.empty) {
-                    listText += "No dates added yet.";
-                } else {
-                    snapshot.forEach(d => {
-                        const dat = d.data();
-                        listText += `• ${dat.title}: ${dat.date}\n`;
-                    });
-                }
-                alert(listText);
+    const datesModal = document.getElementById('dates-modal');
+    const closeDatesModal = document.getElementById('close-dates-modal');
+    const datesListContainer = document.getElementById('dates-list-container');
+    const newDateTitle = document.getElementById('new-date-title');
+    const newDateValue = document.getElementById('new-date-value');
+    const saveDateBtn = document.getElementById('save-date-btn');
+
+    async function loadImportantDates(code) {
+        if (!datesListContainer) return;
+        const datesQuery = query(collection(db, "couples", code, "importantDates"), orderBy("createdAt", "asc"));
+        const snapshot = await getDocs(datesQuery);
+        datesListContainer.innerHTML = '';
+        if (snapshot.empty) {
+            datesListContainer.innerHTML = `<p style="color: #888; text-align: center; font-size: 13px; margin: 5px 0;">No important dates added yet.</p>`;
+            return;
+        }
+        snapshot.forEach(d => {
+            const dat = d.data();
+            const item = document.createElement('div');
+            item.style.cssText = "display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.05); font-size: 13px;";
+            item.innerHTML = `<strong>${dat.title}</strong> <span>${dat.date}</span>`;
+            datesListContainer.appendChild(item);
+        });
+    }
+
+    if (menuDates && datesModal) {
+        menuDates.addEventListener('click', () => {
+            datesModal.classList.remove('hidden');
+            loadImportantDates(coupleCode);
+        });
+    }
+
+    if (closeDatesModal && datesModal) {
+        closeDatesModal.addEventListener('click', () => datesModal.classList.add('hidden'));
+    }
+
+    if (saveDateBtn) {
+        saveDateBtn.addEventListener('click', async () => {
+            const title = newDateTitle.value.trim();
+            const dateVal = newDateValue.value.trim();
+            if (!title || !dateVal) {
+                alert("Please fill in both fields");
+                return;
             }
+            await addDoc(collection(db, "couples", coupleCode, "importantDates"), {
+                title: title,
+                date: dateVal,
+                createdAt: new Date()
+            });
+            newDateTitle.value = '';
+            newDateValue.value = '';
+            loadImportantDates(coupleCode);
         });
     }
 
