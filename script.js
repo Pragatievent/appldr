@@ -198,6 +198,7 @@ function initCloudApp(coupleCode) {
             if (target) target.classList.add('active');
         });
     });
+
     // --- Dark Mode Toggle & Persistence ---
     const darkModeToggle = document.querySelector('.switch input');
     if (localStorage.getItem('theme') === 'dark') {
@@ -215,7 +216,8 @@ function initCloudApp(coupleCode) {
             }
         });
     }
-// Moments Subtabs Switching (Selfie vs Memories)
+
+    // Moments Subtabs Switching (Selfie vs Memories)
     const subtabBtns = document.querySelectorAll('.subtab-btn');
     const subtabPanes = document.querySelectorAll('.subtab-pane');
     subtabBtns.forEach(btn => {
@@ -227,6 +229,7 @@ function initCloudApp(coupleCode) {
             if (targetPane) targetPane.classList.add('active');
         });
     });
+
     // --- A. Editable & Live Countdown Sync ---
     const countdownCard = document.querySelector('.countdown-card');
     const countdownDays = document.querySelector('.countdown-days');
@@ -283,7 +286,7 @@ function initCloudApp(coupleCode) {
             } else if (action === '2') {
                 const datesQuery = query(collection(db, "couples", coupleCode, "importantDates"), orderBy("createdAt", "asc"));
                 const snapshot = await getDocs(datesQuery);
-                let listText = "🗓️ Saved Important Dates:\n\n";
+                let listText = "🗓 Saved Important Dates:\n\n";
                 if (snapshot.empty) {
                     listText += "No dates added yet.";
                 } else {
@@ -594,3 +597,14 @@ function initCloudApp(coupleCode) {
             });
         });
     }
+}
+
+function calculateHaversine(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    return Math.round(R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))));
+}
