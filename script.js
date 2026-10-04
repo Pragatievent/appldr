@@ -520,7 +520,7 @@ function initCloudApp(coupleCode) {
         closeDistanceModal.addEventListener('click', () => distanceModal.classList.add('hidden'));
     }
 
-   // 6. Real-time Memories & Selfie Gallery Sync (Device Uploads & Firestore)
+    // 6. Real-time Memories & Selfie Gallery Sync (Device Uploads & Firestore)
     const memoriesGrid = document.querySelector('.memories-grid');
 
     const handleImageUpload = (file) => {
@@ -535,7 +535,6 @@ function initCloudApp(coupleCode) {
         reader.readAsDataURL(file);
     };
 
-    // Camera button for Random Selfie tab
     const takeSelfieBtns = document.querySelectorAll('.random-selfie-card .primary-btn, .chat-action-btn');
     takeSelfieBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -550,7 +549,6 @@ function initCloudApp(coupleCode) {
         });
     });
 
-    // Helper to bind upload triggers for Memories
     const setupMemoryUploadTriggers = () => {
         const uploadTriggers = document.querySelectorAll('#open-add-memory-btn, #upload-device-photo-btn');
         uploadTriggers.forEach(btn => {
@@ -571,7 +569,6 @@ function initCloudApp(coupleCode) {
     if (memoriesGrid) {
         const memoriesQuery = query(collection(db, "couples", coupleCode, "memories"), orderBy("createdAt", "desc"));
         onSnapshot(memoriesQuery, (snapshot) => {
-            // Remove existing photo cells while keeping the grid container intact
             const existingCells = memoriesGrid.querySelectorAll('.memory-cell:not(.add-memory-cell)');
             existingCells.forEach(c => c.remove());
 
@@ -588,3 +585,14 @@ function initCloudApp(coupleCode) {
             setupMemoryUploadTriggers();
         });
     }
+}
+
+function calculateHaversine(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    return Math.round(R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))));
+}
