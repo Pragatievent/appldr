@@ -976,15 +976,15 @@ body.dark-mode .subtab-btn.active, body.dark-mode .task-subtab.active {
 }
 /* Fix Chat Screen Layout & Sticky Input */
 #tab-chat {
-    padding: 0 !important;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    display: none; /* Inherits hidden state from tab-pane */
 }
 
 #tab-chat.active {
+    padding: 0 !important;
+    height: 100%;
     display: flex !important;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .chat-messages {
