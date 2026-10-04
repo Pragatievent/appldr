@@ -188,7 +188,91 @@ function initCloudApp(coupleCode) {
             if (target) target.classList.add('active');
         });
     });
+    // --- A. Editable & Live Countdown Sync ---
+    const countdownCard = document.querySelector('.countdown-card');
+    const countdownDays = document.querySelector('.countdown-days');
+    const countdownTitleEl = document.querySelector('.countdown-title');
+    const countdownLabelEl = document.querySelector('.countdown-label');
 
+    if (countdownCard) {
+        countdownCard.addEventListener('click', async () => {
+            const newTitle = prompt("Enter countdown title (e.g., NEXT VISIT / ANNIVERSARY):", countdownTitleEl ? countdownTitleEl.textContent : "COUNTDOWN");
+            if (!newTitle) return;
+            const newDate = prompt("Enter target date (Format: YYYY-MM-DD, e.g., 2026-12-31):");
+            if (!newDate) return;
+
+            await updateDoc(doc(db, "couples", coupleCode), {
+                countdownTitle: newTitle,
+                countdownTarget: newDate
+            });
+            alert("Countdown updated successfully!");
+        });
+    }
+
+    // --- B. "Our Story" Cloud Sync ---
+    const menuOurStory = document.getElementById('menu-our-story');
+    if (menuOurStory) {
+        menuOurStory.addEventListener('click', async () => {
+            const coupleRef = doc(db, "couples", coupleCode);
+            const docSnap = await getDoc(coupleRef);
+            const currentStory = docSnap.exists() ? (docSnap.data().ourStory || "No story added yet. Tell your story here!") : "";
+            
+            const newStory = prompt("📖 Edit 'Our Story' (How you met, special memories):", currentStory);
+            if (newStory !== null) {
+                await updateDoc(coupleRef, { ourStory: newStory });
+                alert("✨ Our Story saved to your cloud space!");
+            }
+        });
+    }
+
+    // --- C. Important Dates Cloud Sync ---
+    const menuDates = document.getElementById('menu-dates');
+    if (menuDates) {
+        menuDates.addEventListener('click', async () => {
+            const action = prompt("🎂 Important Dates:\nType '1' to Add a new date\nType '2' to View saved dates:");
+            if (action === '1') {
+                const title = prompt("Enter event name (e.g., First Date, Anniversary):");
+                const dateVal = prompt("Enter date (e.g., October 15):");
+                if (title && dateVal) {
+                    await addDoc(collection(db, "couples", coupleCode, "importantDates"), {
+                        title: title,
+                        date: dateVal,
+                        createdAt: new Date()
+                    });
+                    alert("🎉 Important date added successfully!");
+                }
+            } else if (action === '2') {
+                const datesQuery = query(collection(db, "couples", coupleCode, "importantDates"), orderBy("createdAt", "asc"));
+                const snapshot = await getDocs(datesQuery);
+                let listText = "🗓️ Saved Important Dates:\n\n";
+                if (snapshot.empty) {
+                    listText += "No dates added yet.";
+                } else {
+                    snapshot.forEach(d => {
+                        const dat = d.data();
+                        listText += `• ${dat.title}: ${dat.date}\n`;
+                    });
+                }
+                alert(listText);
+            }
+        });
+    }
+
+    // --- D. Real-time Couple Document Listener (Countdown & Details) ---
+    onSnapshot(doc(db, "couples", coupleCode), (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data();
+            if (data.countdownTarget && countdownDays) {
+                if (countdownTitleEl) countdownTitleEl.textContent = data.countdownTitle || "COUNTDOWN";
+                const target = new Date(data.countdownTarget);
+                const now = new Date();
+                const diffTime = target - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                countdownDays.textContent = diffDays >= 0 ? diffDays : 0;
+                if (countdownLabelEl) countdownLabelEl.textContent = `Days until ${data.countdownTitle || 'Special Day'}`;
+            }
+        }
+    });
     // 1. Real-time Chat Sync
     const chatMessages = document.getElementById('chat-messages');
     const chatInput = document.getElementById('chat-input');
