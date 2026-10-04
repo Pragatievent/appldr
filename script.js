@@ -181,6 +181,41 @@ if (logoutBtn) {
     });
 }
 
+// --- IMAGE COMPRESSION HELPER (Prevents Firestore 1MB limits & disappearance) ---
+function compressImage(file, callback) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 800;
+            const MAX_HEIGHT = 800;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+                if (width > MAX_WIDTH) {
+                    height *= MAX_WIDTH / width;
+                    width = MAX_WIDTH;
+                }
+            } else {
+                if (height > MAX_HEIGHT) {
+                    width *= MAX_HEIGHT / height;
+                    height = MAX_HEIGHT;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            callback(canvas.toDataURL('image/jpeg', 0.7));
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
 // --- REAL-TIME CLOUD APP LOGIC (Firestore Sync) ---
 function initCloudApp(coupleCode) {
     const settingsCodeText = document.getElementById('settings-code-text');
@@ -229,6 +264,21 @@ function initCloudApp(coupleCode) {
             if (targetPane) targetPane.classList.add('active');
         });
     });
+
+    // --- Notification Button / Love Ping Listener ---
+    let lastPingTime = null;
+    const notificationBtn = document.querySelector('.notification-btn, #notification-btn, .fa-bell');
+    if (notificationBtn) {
+        notificationBtn.addEventListener('click', async () => {
+            await setDoc(doc(db, "couples", coupleCode), {
+                lastPing: {
+                    sender: currentUserEmail,
+                    timestamp: new Date()
+                }
+            }, { merge: true });
+            alert("💖 Love ping sent to your partner!");
+        });
+    }
 
     // --- A. Editable & Live Countdown Sync ---
     const countdownCard = document.querySelector('.countdown-card');
@@ -340,7 +390,7 @@ function initCloudApp(coupleCode) {
         });
     }
 
-    // --- D. Real-time Couple Document Listener (Countdown & Details) ---
+    // --- D. Real-time Couple Document Listener (Countdown & Pings) ---
     onSnapshot(doc(db, "couples", coupleCode), (docSnap) => {
         if (docSnap.exists()) {
             const data = docSnap.data();
@@ -353,13 +403,22 @@ function initCloudApp(coupleCode) {
                 countdownDays.textContent = diffDays >= 0 ? diffDays : 0;
                 if (countdownLabelEl) countdownLabelEl.textContent = `Days until ${data.countdownTitle || 'Special Day'}`;
             }
+
+            if (data.lastPing && data.lastPing.sender !== currentUserEmail) {
+                const pingTime = data.lastPing.timestamp?.toMillis ? data.lastPing.timestamp.toMillis() : new Date(data.lastPing.timestamp).getTime();
+                if (!lastPingTime || pingTime > lastPingTime) {
+                    lastPingTime = pingTime;
+                    alert("💖 Your partner sent you a Love Ping!");
+                }
+            }
         }
     });
 
-    // 1. Real-time Chat Sync
+    // 1. Real-time Chat Sync & Image Sharing
     const chatMessages = document.getElementById('chat-messages');
     const chatInput = document.getElementById('chat-input');
     const sendChatBtn = document.getElementById('send-chat-btn');
+    const chatActionBtn = document.querySelector('.chat-action-btn');
 
     if (chatMessages && chatInput && sendChatBtn) {
         const q = query(collection(db, "couples", coupleCode, "chats"), orderBy("timestamp", "asc"));
@@ -369,34 +428,69 @@ function initCloudApp(coupleCode) {
                 const msg = docSnap.data();
                 const bubble = document.createElement('div');
                 bubble.className = `chat-bubble ${msg.sender === currentUserEmail ? 'sent' : 'received'}`;
-                bubble.textContent = msg.text;
+                
+                if (msg.text) {
+                    const textP = document.createElement('p');
+                    textP.textContent = msg.text;
+                    bubble.appendChild(textP);
+                }
+                if (msg.image) {
+                    const img = document.createElement('img');
+                    img.src = msg.image;
+                    img.style.cssText = "max-width: 160px; border-radius: 8px; margin-top: 5px; display: block;";
+                    bubble.appendChild(img);
+                }
                 chatMessages.appendChild(bubble);
             });
             chatMessages.scrollTop = chatMessages.scrollHeight;
         });
 
-        const sendMessage = async () => {
-            const text = chatInput.value.trim();
-            if (!text) return;
-
-            chatInput.value = '';
-            chatInput.focus();
-
+        const sendMessage = async (text = '', imageUrl = '') => {
+            if (!text && !imageUrl) return;
             await addDoc(collection(db, "couples", coupleCode, "chats"), {
                 text: text,
+                image: imageUrl,
                 sender: currentUserEmail,
                 timestamp: new Date()
             });
         };
 
-        sendChatBtn.addEventListener('click', sendMessage);
+        sendChatBtn.addEventListener('click', () => {
+            const text = chatInput.value.trim();
+            if (text) {
+                sendMessage(text);
+                chatInput.value = '';
+                chatInput.focus();
+            }
+        });
 
         chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                sendMessage();
+                const text = chatInput.value.trim();
+                if (text) {
+                    sendMessage(text);
+                    chatInput.value = '';
+                }
             }
         });
+
+        if (chatActionBtn) {
+            chatActionBtn.addEventListener('click', () => {
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*';
+                fileInput.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        compressImage(file, (compressedBase64) => {
+                            sendMessage('', compressedBase64);
+                        });
+                    }
+                };
+                fileInput.click();
+            });
+        }
     }
 
     // 2. Real-time Live GPS Location Sync
@@ -560,22 +654,10 @@ function initCloudApp(coupleCode) {
         closeDistanceModal.addEventListener('click', () => distanceModal.classList.add('hidden'));
     }
 
-    // 6. Real-time Memories & Selfie Gallery Sync (Device Uploads & Firestore)
+    // 6. Real-time Memories & Selfie Gallery Sync (Compressed & Saved)
     const memoriesGrid = document.querySelector('.memories-grid');
 
-    const handleImageUpload = (file) => {
-        const reader = new FileReader();
-        reader.onload = async (uploadEvent) => {
-            const base64Image = uploadEvent.target.result;
-            await addDoc(collection(db, "couples", coupleCode, "memories"), {
-                image: base64Image,
-                createdAt: new Date()
-            });
-        };
-        reader.readAsDataURL(file);
-    };
-
-    const takeSelfieBtns = document.querySelectorAll('.random-selfie-card .primary-btn, .chat-action-btn');
+    const takeSelfieBtns = document.querySelectorAll('.random-selfie-card .primary-btn');
     takeSelfieBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const fileInput = document.createElement('input');
@@ -583,7 +665,15 @@ function initCloudApp(coupleCode) {
             fileInput.accept = 'image/*';
             fileInput.capture = 'environment';
             fileInput.onchange = (e) => {
-                if (e.target.files[0]) handleImageUpload(e.target.files[0]);
+                const file = e.target.files[0];
+                if (file) {
+                    compressImage(file, async (compressedBase64) => {
+                        await addDoc(collection(db, "couples", coupleCode, "memories"), {
+                            image: compressedBase64,
+                            createdAt: new Date()
+                        });
+                    });
+                }
             };
             fileInput.click();
         });
@@ -597,7 +687,15 @@ function initCloudApp(coupleCode) {
                 memoryInput.type = 'file';
                 memoryInput.accept = 'image/*';
                 memoryInput.onchange = (e) => {
-                    if (e.target.files[0]) handleImageUpload(e.target.files[0]);
+                    const file = e.target.files[0];
+                    if (file) {
+                        compressImage(file, async (compressedBase64) => {
+                            await addDoc(collection(db, "couples", coupleCode, "memories"), {
+                                image: compressedBase64,
+                                createdAt: new Date()
+                            });
+                        });
+                    }
                 };
                 memoryInput.click();
             });
