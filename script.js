@@ -208,17 +208,21 @@ function initCloudApp(coupleCode) {
             chatMessages.scrollTop = chatMessages.scrollHeight;
         });
 
-      sendChatBtn.addEventListener('click', async () => {
-        const text = chatInput.value.trim();
-        if (!text) return;
-        await addDoc(collection(db, "couples", coupleCode, "chats"), {
-            text: text,
-            sender: currentUserEmail,
-            timestamp: new Date()
+        // Prevent input from losing focus on mobile when touching send
+        sendChatBtn.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
         });
-        chatInput.value = '';
-        chatInput.focus(); // Keeps the phone keyboard open!
-    });
+
+        sendChatBtn.addEventListener('click', async () => {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            await addDoc(collection(db, "couples", coupleCode, "chats"), {
+                text: text,
+                sender: currentUserEmail,
+                timestamp: new Date()
+            });
+            chatInput.value = '';
+        });
     }
 
     // 2. Real-time Live GPS Location Sync
