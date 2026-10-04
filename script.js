@@ -98,52 +98,49 @@ authSubmitBtn.addEventListener('click', async () => {
 });
 
 // --- CREATE COUPLE SPACE IN FIRESTORE ---
-    createCoupleBtn.addEventListener('click', async () => {
-        const code = 'LOVE-' + Math.floor(1000 + Math.random() * 9000);
-        try {
-            await setDoc(doc(db, "couples", code), {
-                createdAt: new Date(),
-                createdBy: currentUserEmail,
-                partnerJoined: false
-            });
-            currentCoupleCode = code;
-            localStorage.setItem('active_couple_code', code);
-            generatedCode.textContent = code;
-            displayCodeBox.classList.remove('hidden');
-            alert('Success! Cloud space created with code: ' + code); // Confirms cloud write
-        } catch (err) {
-            alert('Error creating space: ' + err.message);
-        }
-    });
+createCoupleBtn.addEventListener('click', async () => {
+    const code = 'LOVE-' + Math.floor(1000 + Math.random() * 9000);
+    try {
+        await setDoc(doc(db, "couples", code), {
+            createdAt: new Date(),
+            createdBy: currentUserEmail,
+            partnerJoined: false
+        });
+        currentCoupleCode = code;
+        localStorage.setItem('active_couple_code', code);
+        generatedCode.textContent = code;
+        displayCodeBox.classList.remove('hidden');
+        alert('Success! Cloud space created with code: ' + code);
+    } catch (err) {
+        alert('Error creating space: ' + err.message);
+    }
+});
 
-    // --- ENTER APP AFTER CREATING CODE ---
-    enterAppFromCreate.addEventListener('click', () => {
-        if (!currentCoupleCode) {
-            currentCoupleCode = generatedCode.textContent.trim() || localStorage.getItem('active_couple_code');
-        }
-        
-        if (!currentCoupleCode) {
-            alert('Please create a couple space first!');
-            return;
-        }
+// --- ENTER APP AFTER CREATING CODE ---
+enterAppFromCreate.addEventListener('click', () => {
+    if (!currentCoupleCode) {
+        currentCoupleCode = generatedCode.textContent.trim() || localStorage.getItem('active_couple_code');
+    }
+    
+    if (!currentCoupleCode) {
+        alert('Please create a couple space first!');
+        return;
+    }
 
-        coupleScreen.classList.remove('active');
-        appScreen.classList.add('active');
-        initCloudApp(currentCoupleCode);
-    });
+    coupleScreen.classList.remove('active');
+    appScreen.classList.add('active');
+    initCloudApp(currentCoupleCode);
+});
 
 // --- JOIN COUPLE SPACE IN FIRESTORE ---
 joinCoupleBtn.addEventListener('click', async () => {
     let rawInput = joinCodeInput.value.trim().toUpperCase();
     if (!rawInput) { alert('Enter couple code'); return; }
 
-    // Automatically prepend "LOVE-" if the user only typed numbers
     let code = rawInput;
     if (/^\d+$/.test(rawInput)) {
         code = 'LOVE-' + rawInput;
     }
-
-    console.log("Looking for code:", JSON.stringify(code));
 
     try {
         const coupleDocRef = doc(db, "couples", code);
@@ -362,18 +359,8 @@ function initCloudApp(coupleCode) {
             });
         });
     }
-}
 
-function calculateHaversine(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    return Math.round(R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))));
-}
-// 5. "Us" Section Menu Modals & Navigation
+    // 5. "Us" Section Menu Modals & Navigation
     const menuSettings = document.getElementById('menu-settings');
     const settingsModal = document.getElementById('settings-submodal');
     const closeSettingsModal = document.getElementById('close-settings-modal');
@@ -415,7 +402,7 @@ function calculateHaversine(lat1, lon1, lat2, lon2) {
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.accept = 'image/*';
-            fileInput.capture = 'environment'; // Opens phone camera directly
+            fileInput.capture = 'environment';
             fileInput.onchange = async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
@@ -439,3 +426,14 @@ function calculateHaversine(lat1, lon1, lat2, lon2) {
             memoryInput.click();
         });
     }
+}
+
+function calculateHaversine(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon/2) * Math.sin(dLon/2);
+    return Math.round(R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))));
+}
