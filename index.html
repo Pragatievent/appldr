@@ -142,33 +142,41 @@
                     </div>
                 </div>
 
-                <!-- 📸 TAB 3: MOMENTS -->
-                <div id="tab-moments" class="tab-pane">
-                    <div class="moments-header">
-                        <h2>Moments ❤️</h2>
-                        <div class="moments-subtabs">
-                            <button class="subtab-btn active" data-subtab="selfie">Random Selfie</button>
-                            <button class="subtab-btn" data-subtab="memories">Memories</button>
-                        </div>
-                    </div>
+                <!-- Moments Tab -->
+<div id="tab-moments" class="tab-pane">
+    <div class="moments-header">
+        <h2>Moments ❤️</h2>
+        <div class="moments-subtabs">
+            <button class="subtab-btn active" data-subtab="random-selfie">Random Selfie</button>
+            <button class="subtab-btn" data-subtab="memories">Memories</button>
+        </div>
+    </div>
 
-                    <div id="subtab-pane-selfie" class="subtab-pane active">
-                        <div class="card random-selfie-card">
-                            <div class="random-badge">🎲 RANDOM SELFIE</div>
-                            <p class="random-prompt">"Show me what you're doing right now!"</p>
-                            <button class="primary-btn" style="margin-top: 15px;"><i class="fa-solid fa-camera"></i> Take Selfie</button>
-                        </div>
-                    </div>
+    <!-- Random Selfie Subtab Pane -->
+    <div id="subtab-random-selfie" class="subtab-pane active">
+        <div class="card random-selfie-card">
+            <div class="random-badge">DAILY PROMPT</div>
+            <p class="random-prompt">Take a selfie right now and send it to your partner!</p>
+            <button class="primary-btn" style="margin-top: 15px;">Take Photo</button>
+        </div>
+    </div>
 
-                    <div id="subtab-pane-memories" class="subtab-pane">
-                        <div class="memories-grid">
-                            <div class="memory-cell"><i class="fa-solid fa-image"></i></div>
-                            <div class="memory-cell"><i class="fa-solid fa-image"></i></div>
-                            <div class="memory-cell"><i class="fa-solid fa-image"></i></div>
-                            <div class="memory-cell add-memory-cell" id="open-add-memory-btn"><i class="fa-solid fa-plus"></i><span>Add</span></div>
-                        </div>
-                    </div>
+    <!-- Memories Subtab Pane -->
+    <div id="subtab-memories" class="subtab-pane">
+        <div class="card">
+            <div class="card-title-row">
+                <span>Shared Gallery</span>
+                <button class="text-link" id="upload-device-photo-btn">+ Upload Photo</button>
+            </div>
+            <div class="memories-grid">
+                <div class="memory-cell add-memory-cell" id="open-add-memory-btn">
+                    <i class="fas fa-plus"></i>
+                    <span>Add</span>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
 
                 <!-- 📅 TAB 4: PLANS -->
                 <div id="tab-plans" class="tab-pane">
