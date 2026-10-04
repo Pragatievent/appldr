@@ -1,7 +1,7 @@
 // Import Firebase SDK modules via CDN
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, doc, setDoc, getDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -188,6 +188,7 @@ function initCloudApp(coupleCode) {
             if (target) target.classList.add('active');
         });
     });
+
     // --- A. Editable & Live Countdown Sync ---
     const countdownCard = document.querySelector('.countdown-card');
     const countdownDays = document.querySelector('.countdown-days');
@@ -244,7 +245,7 @@ function initCloudApp(coupleCode) {
             } else if (action === '2') {
                 const datesQuery = query(collection(db, "couples", coupleCode, "importantDates"), orderBy("createdAt", "asc"));
                 const snapshot = await getDocs(datesQuery);
-                let listText = "🗓️ Saved Important Dates:\n\n";
+                let listText = "🗓️️ Saved Important Dates:\n\n";
                 if (snapshot.empty) {
                     listText += "No dates added yet.";
                 } else {
@@ -273,6 +274,7 @@ function initCloudApp(coupleCode) {
             }
         }
     });
+
     // 1. Real-time Chat Sync
     const chatMessages = document.getElementById('chat-messages');
     const chatInput = document.getElementById('chat-input');
@@ -296,11 +298,9 @@ function initCloudApp(coupleCode) {
             const text = chatInput.value.trim();
             if (!text) return;
 
-            // Clear and refocus instantly so the keyboard stays locked open
             chatInput.value = '';
             chatInput.focus();
 
-            // Send to Firebase in the background
             await addDoc(collection(db, "couples", coupleCode, "chats"), {
                 text: text,
                 sender: currentUserEmail,
@@ -310,7 +310,6 @@ function initCloudApp(coupleCode) {
 
         sendChatBtn.addEventListener('click', sendMessage);
 
-        // Allow pressing "Enter" on the mobile keyboard to send smoothly
         chatInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -478,20 +477,6 @@ function initCloudApp(coupleCode) {
     }
     if (closeDistanceModal && distanceModal) {
         closeDistanceModal.addEventListener('click', () => distanceModal.classList.add('hidden'));
-    }
-
-    const menuOurStory = document.getElementById('menu-our-story');
-    if (menuOurStory) {
-        menuOurStory.addEventListener('click', () => {
-            alert("📖 Our Story: Your custom couple memories and milestones will be saved here!");
-        });
-    }
-
-    const menuDates = document.getElementById('menu-dates');
-    if (menuDates) {
-        menuDates.addEventListener('click', () => {
-            alert("🎂 Important Dates: Anniversaries and countdown milestones manager!");
-        });
     }
 
     // 6. Moments & Camera Handlers (Selfie & Memories)
