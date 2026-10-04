@@ -208,20 +208,30 @@ function initCloudApp(coupleCode) {
             chatMessages.scrollTop = chatMessages.scrollHeight;
         });
 
-        // Prevent input from losing focus on mobile when touching send
-        sendChatBtn.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-        });
-
-        sendChatBtn.addEventListener('click', async () => {
+        const sendMessage = async () => {
             const text = chatInput.value.trim();
             if (!text) return;
+
+            // Clear and refocus instantly so the keyboard stays locked open
+            chatInput.value = '';
+            chatInput.focus();
+
+            // Send to Firebase in the background
             await addDoc(collection(db, "couples", coupleCode, "chats"), {
                 text: text,
                 sender: currentUserEmail,
                 timestamp: new Date()
             });
-            chatInput.value = '';
+        };
+
+        sendChatBtn.addEventListener('click', sendMessage);
+
+        // Allow pressing "Enter" on the mobile keyboard to send smoothly
+        chatInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendMessage();
+            }
         });
     }
 
