@@ -1,8 +1,8 @@
 {
   "name": "Cloud Couple App",
   "short_name": "CoupleApp",
-  "start_url": "/pragatievent.github.io/",
-  "scope": "/pragatievent.github.io/",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#ff4757",
