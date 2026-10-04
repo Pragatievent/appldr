@@ -47,119 +47,129 @@ onAuthStateChanged(auth, async (user) => {
         currentUserEmail = user.email;
         const emailDisplay = document.getElementById('user-email-display');
         if (emailDisplay) emailDisplay.textContent = user.email;
-        authScreen.classList.remove('active');
+        if (authScreen) authScreen.classList.remove('active');
 
         if (currentCoupleCode) {
-            coupleScreen.classList.remove('active');
-            appScreen.classList.add('active');
+            if (coupleScreen) coupleScreen.classList.remove('active');
+            if (appScreen) appScreen.classList.add('active');
             initCloudApp(currentCoupleCode);
         } else {
-            coupleScreen.classList.add('active');
+            if (coupleScreen) coupleScreen.classList.add('active');
         }
     } else {
-        appScreen.classList.remove('active');
-        coupleScreen.classList.remove('active');
-        authScreen.classList.add('active');
+        if (appScreen) appScreen.classList.remove('active');
+        if (coupleScreen) coupleScreen.classList.remove('active');
+        if (authScreen) authScreen.classList.add('active');
     }
 });
 
 // --- AUTH TOGGLE ---
-switchAuthLink.addEventListener('click', () => {
-    isLoginMode = !isLoginMode;
-    if (isLoginMode) {
-        authTitle.textContent = "Welcome Back";
-        authSubmitBtn.textContent = "Log In";
-        switchAuthText.textContent = "Don't have an account?";
-        switchAuthLink.textContent = "Sign Up";
-    } else {
-        authTitle.textContent = "Create Account";
-        authSubmitBtn.textContent = "Sign Up";
-        switchAuthText.textContent = "Already have an account?";
-        switchAuthLink.textContent = "Log In";
-    }
-});
+if (switchAuthLink) {
+    switchAuthLink.addEventListener('click', () => {
+        isLoginMode = !isLoginMode;
+        if (isLoginMode) {
+            if (authTitle) authTitle.textContent = "Welcome Back";
+            if (authSubmitBtn) authSubmitBtn.textContent = "Log In";
+            if (switchAuthText) switchAuthText.textContent = "Don't have an account?";
+            switchAuthLink.textContent = "Sign Up";
+        } else {
+            if (authTitle) authTitle.textContent = "Create Account";
+            if (authSubmitBtn) authSubmitBtn.textContent = "Sign Up";
+            if (switchAuthText) switchAuthText.textContent = "Already have an account?";
+            switchAuthLink.textContent = "Log In";
+        }
+    });
+}
 
 // --- LOGIN / SIGNUP WITH FIREBASE AUTH ---
-authSubmitBtn.addEventListener('click', async () => {
-    const email = authEmail.value.trim();
-    const pwd = authPassword.value.trim();
-    if (!email || !pwd) { alert('Please fill in all fields'); return; }
+if (authSubmitBtn) {
+    authSubmitBtn.addEventListener('click', async () => {
+        const email = authEmail ? authEmail.value.trim() : '';
+        const pwd = authPassword ? authPassword.value.trim() : '';
+        if (!email || !pwd) { alert('Please fill in all fields'); return; }
 
-    try {
-        if (isLoginMode) {
-            await signInWithEmailAndPassword(auth, email, pwd);
-        } else {
-            await createUserWithEmailAndPassword(auth, email, pwd);
-            alert('Account created successfully!');
+        try {
+            if (isLoginMode) {
+                await signInWithEmailAndPassword(auth, email, pwd);
+            } else {
+                await createUserWithEmailAndPassword(auth, email, pwd);
+                alert('Account created successfully!');
+            }
+        } catch (error) {
+            alert('Authentication Error: ' + error.message);
         }
-    } catch (error) {
-        alert('Authentication Error: ' + error.message);
-    }
-});
+    });
+}
 
 // --- CREATE COUPLE SPACE IN FIRESTORE ---
-createCoupleBtn.addEventListener('click', async () => {
-    const code = 'LOVE-' + Math.floor(1000 + Math.random() * 9000);
-    try {
-        await setDoc(doc(db, "couples", code), {
-            createdAt: new Date(),
-            createdBy: currentUserEmail,
-            partnerJoined: false
-        });
-        currentCoupleCode = code;
-        localStorage.setItem('active_couple_code', code);
-        generatedCode.textContent = code;
-        displayCodeBox.classList.remove('hidden');
-        alert('Success! Cloud space created with code: ' + code);
-    } catch (err) {
-        alert('Error creating space: ' + err.message);
-    }
-});
-
-// --- ENTER APP AFTER CREATING CODE ---
-enterAppFromCreate.addEventListener('click', () => {
-    if (!currentCoupleCode) {
-        currentCoupleCode = generatedCode.textContent.trim() || localStorage.getItem('active_couple_code');
-    }
-    
-    if (!currentCoupleCode) {
-        alert('Please create a couple space first!');
-        return;
-    }
-
-    coupleScreen.classList.remove('active');
-    appScreen.classList.add('active');
-    initCloudApp(currentCoupleCode);
-});
-
-// --- JOIN COUPLE SPACE IN FIRESTORE ---
-joinCoupleBtn.addEventListener('click', async () => {
-    let rawInput = joinCodeInput.value.trim().toUpperCase();
-    if (!rawInput) { alert('Enter couple code'); return; }
-
-    let code = rawInput;
-    if (/^\d+$/.test(rawInput)) {
-        code = 'LOVE-' + rawInput;
-    }
-
-    try {
-        const coupleDocRef = doc(db, "couples", code);
-        const docSnap = await getDoc(coupleDocRef);
-
-        if (docSnap.exists()) {
-            await updateDoc(coupleDocRef, { partnerJoined: true, partnerEmail: currentUserEmail });
+if (createCoupleBtn) {
+    createCoupleBtn.addEventListener('click', async () => {
+        const code = 'LOVE-' + Math.floor(1000 + Math.random() * 9000);
+        try {
+            await setDoc(doc(db, "couples", code), {
+                createdAt: new Date(),
+                createdBy: currentUserEmail,
+                partnerJoined: false
+            });
             currentCoupleCode = code;
             localStorage.setItem('active_couple_code', code);
-            coupleScreen.classList.remove('active');
-            appScreen.classList.add('active');
-            initCloudApp(code);
-        } else {
-            alert(`Code "${code}" not found in database! Please check spelling.`);
+            if (generatedCode) generatedCode.textContent = code;
+            if (displayCodeBox) displayCodeBox.classList.remove('hidden');
+            alert('Success! Cloud space created with code: ' + code);
+        } catch (err) {
+            alert('Error creating space: ' + err.message);
         }
-    } catch (err) {
-        alert('Error joining: ' + err.message);
-    }
-});
+    });
+}
+
+// --- ENTER APP AFTER CREATING CODE ---
+if (enterAppFromCreate) {
+    enterAppFromCreate.addEventListener('click', () => {
+        if (!currentCoupleCode) {
+            currentCoupleCode = (generatedCode ? generatedCode.textContent.trim() : '') || localStorage.getItem('active_couple_code');
+        }
+        
+        if (!currentCoupleCode) {
+            alert('Please create a couple space first!');
+            return;
+        }
+
+        if (coupleScreen) coupleScreen.classList.remove('active');
+        if (appScreen) appScreen.classList.add('active');
+        initCloudApp(currentCoupleCode);
+    });
+}
+
+// --- JOIN COUPLE SPACE IN FIRESTORE ---
+if (joinCoupleBtn) {
+    joinCoupleBtn.addEventListener('click', async () => {
+        let rawInput = joinCodeInput ? joinCodeInput.value.trim().toUpperCase() : '';
+        if (!rawInput) { alert('Enter couple code'); return; }
+
+        let code = rawInput;
+        if (/^\d+$/.test(rawInput)) {
+            code = 'LOVE-' + rawInput;
+        }
+
+        try {
+            const coupleDocRef = doc(db, "couples", code);
+            const docSnap = await getDoc(coupleDocRef);
+
+            if (docSnap.exists()) {
+                await updateDoc(coupleDocRef, { partnerJoined: true, partnerEmail: currentUserEmail });
+                currentCoupleCode = code;
+                localStorage.setItem('active_couple_code', code);
+                if (coupleScreen) coupleScreen.classList.remove('active');
+                if (appScreen) appScreen.classList.add('active');
+                initCloudApp(code);
+            } else {
+                alert(`Code "${code}" not found in database! Please check spelling.`);
+            }
+        } catch (err) {
+            alert('Error joining: ' + err.message);
+        }
+    });
+}
 
 // Logout
 const logoutBtn = document.getElementById('settings-logout-btn');
@@ -245,7 +255,7 @@ function initCloudApp(coupleCode) {
             } else if (action === '2') {
                 const datesQuery = query(collection(db, "couples", coupleCode, "importantDates"), orderBy("createdAt", "asc"));
                 const snapshot = await getDocs(datesQuery);
-                let listText = "🗓️️ Saved Important Dates:\n\n";
+                let listText = "🗓️ Saved Important Dates:\n\n";
                 if (snapshot.empty) {
                     listText += "No dates added yet.";
                 } else {
