@@ -198,6 +198,23 @@ function initCloudApp(coupleCode) {
             if (target) target.classList.add('active');
         });
     });
+    // --- Dark Mode Toggle & Persistence ---
+    const darkModeToggle = document.querySelector('.switch input');
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+        if (darkModeToggle) darkModeToggle.checked = true;
+    }
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('change', () => {
+            if (darkModeToggle.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    }
 // Moments Subtabs Switching (Selfie vs Memories)
     const subtabBtns = document.querySelectorAll('.subtab-btn');
     const subtabPanes = document.querySelectorAll('.subtab-pane');
@@ -500,7 +517,21 @@ function initCloudApp(coupleCode) {
         closeDistanceModal.addEventListener('click', () => distanceModal.classList.add('hidden'));
     }
 
-    // 6. Moments & Camera Handlers (Selfie & Memories)
+    // 6. Real-time Memories & Selfie Gallery Sync (Device Uploads & Firestore)
+    const memoriesGrid = document.querySelector('.memories-grid');
+
+    const handleImageUpload = (file) => {
+        const reader = new FileReader();
+        reader.onload = async (uploadEvent) => {
+            const base64Image = uploadEvent.target.result;
+            await addDoc(collection(db, "couples", coupleCode, "memories"), {
+                image: base64Image,
+                createdAt: new Date()
+            });
+        };
+        reader.readAsDataURL(file);
+    };
+
     const takeSelfieBtns = document.querySelectorAll('.random-selfie-card .primary-btn, .chat-action-btn');
     takeSelfieBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -508,10 +539,8 @@ function initCloudApp(coupleCode) {
             fileInput.type = 'file';
             fileInput.accept = 'image/*';
             fileInput.capture = 'environment';
-            fileInput.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                alert("📸 Photo selected! Upload feature syncing to cloud storage...");
+            fileInput.onchange = (e) => {
+                if (e.target.files[0]) handleImageUpload(e.target.files[0]);
             };
             fileInput.click();
         });
@@ -523,22 +552,45 @@ function initCloudApp(coupleCode) {
             const memoryInput = document.createElement('input');
             memoryInput.type = 'file';
             memoryInput.accept = 'image/*';
-            memoryInput.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                alert("✨ Memory added to your shared gallery!");
+            memoryInput.onchange = (e) => {
+                if (e.target.files[0]) handleImageUpload(e.target.files[0]);
             };
             memoryInput.click();
         });
     }
-}
 
-function calculateHaversine(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    return Math.round(R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))));
-}
+    if (memoriesGrid) {
+        const memoriesQuery = query(collection(db, "couples", coupleCode, "memories"), orderBy("createdAt", "desc"));
+        onSnapshot(memoriesQuery, (snapshot) => {
+            const uploadCellHtml = memoriesGrid.querySelector('.add-memory-cell')?.outerHTML || `
+                <div class="memory-cell add-memory-cell" id="open-add-memory-btn">
+                    <i class="fas fa-plus"></i>
+                    <span>Add</span>
+                </div>`;
+            
+            memoriesGrid.innerHTML = uploadCellHtml;
+
+            const newAddBtn = document.getElementById('open-add-memory-btn');
+            if (newAddBtn) {
+                newAddBtn.addEventListener('click', () => {
+                    const memoryInput = document.createElement('input');
+                    memoryInput.type = 'file';
+                    memoryInput.accept = 'image/*';
+                    memoryInput.onchange = (e) => {
+                        if (e.target.files[0]) handleImageUpload(e.target.files[0]);
+                    };
+                    memoryInput.click();
+                });
+            }
+
+            snapshot.forEach((docSnap) => {
+                const mem = docSnap.data();
+                const cell = document.createElement('div');
+                cell.className = 'memory-cell';
+                cell.style.backgroundImage = `url(${mem.image})`;
+                cell.style.backgroundSize = 'cover';
+                cell.style.backgroundPosition = 'center';
+                memoriesGrid.appendChild(cell);
+            });
+        });
+    }
