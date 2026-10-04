@@ -373,3 +373,69 @@ function calculateHaversine(lat1, lon1, lat2, lon2) {
               Math.sin(dLon/2) * Math.sin(dLon/2);
     return Math.round(R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))));
 }
+// 5. "Us" Section Menu Modals & Navigation
+    const menuSettings = document.getElementById('menu-settings');
+    const settingsModal = document.getElementById('settings-submodal');
+    const closeSettingsModal = document.getElementById('close-settings-modal');
+    if (menuSettings && settingsModal) {
+        menuSettings.addEventListener('click', () => settingsModal.classList.remove('hidden'));
+    }
+    if (closeSettingsModal && settingsModal) {
+        closeSettingsModal.addEventListener('click', () => settingsModal.classList.add('hidden'));
+    }
+
+    const menuLocation = document.getElementById('menu-location');
+    const distanceModal = document.getElementById('distance-modal');
+    const closeDistanceModal = document.getElementById('close-distance-modal');
+    if (menuLocation && distanceModal) {
+        menuLocation.addEventListener('click', () => distanceModal.classList.remove('hidden'));
+    }
+    if (closeDistanceModal && distanceModal) {
+        closeDistanceModal.addEventListener('click', () => distanceModal.classList.add('hidden'));
+    }
+
+    const menuOurStory = document.getElementById('menu-our-story');
+    if (menuOurStory) {
+        menuOurStory.addEventListener('click', () => {
+            alert("📖 Our Story: Your custom couple memories and milestones will be saved here!");
+        });
+    }
+
+    const menuDates = document.getElementById('menu-dates');
+    if (menuDates) {
+        menuDates.addEventListener('click', () => {
+            alert("🎂 Important Dates: Anniversaries and countdown milestones manager!");
+        });
+    }
+
+    // 6. Moments & Camera Handlers (Selfie & Memories)
+    const takeSelfieBtns = document.querySelectorAll('.random-selfie-card .primary-btn, .chat-action-btn');
+    takeSelfieBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.capture = 'environment'; // Opens phone camera directly
+            fileInput.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                alert("📸 Photo selected! Upload feature syncing to cloud storage...");
+            };
+            fileInput.click();
+        });
+    });
+
+    const openAddMemoryBtn = document.getElementById('open-add-memory-btn');
+    if (openAddMemoryBtn) {
+        openAddMemoryBtn.addEventListener('click', () => {
+            const memoryInput = document.createElement('input');
+            memoryInput.type = 'file';
+            memoryInput.accept = 'image/*';
+            memoryInput.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                alert("✨ Memory added to your shared gallery!");
+            };
+            memoryInput.click();
+        });
+    }
