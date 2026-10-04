@@ -3,6 +3,7 @@
       "target": {
         "namespace": "android_app",
         "package_name": "io.github.pragatievent.twa",
-        "sha256_cert_fingerprints": ["18:38:EF:39:0A:77:6B:2B:9E:BC:A9:4C:1B:42:A4:5A:00:17:5C:9E:81:36:E3:54:13:05:F6:E8:B9:2F:63:D4"]
+        "sha256_cert_fingerprints": ["FF:2E:7F:3A:A6:62:CC:1D:81:84:B1:84:6D:11:A8:A3:FA:B5:13:8B:6D:99:16:4E:CD:C3:6C:34:1A:29:4F:03"]
       }
     }]
+
