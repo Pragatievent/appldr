@@ -974,3 +974,24 @@ body.dark-mode .subtab-btn.active, body.dark-mode .task-subtab.active {
     background: #2d3436 !important;
     color: #fff !important;
 }
+/* Fix Chat Screen Layout & Sticky Input */
+#tab-chat {
+    padding: 0 !important;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#tab-chat.active {
+    display: flex !important;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
