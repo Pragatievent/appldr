@@ -654,8 +654,18 @@ function initCloudApp(coupleCode) {
         closeDistanceModal.addEventListener('click', () => distanceModal.classList.add('hidden'));
     }
 
-    // 6. Real-time Memories & Selfie Gallery Sync (Compressed & Saved)
+// 6. Real-time Memories & Selfie Gallery Sync (Compressed, Saved & Full-Screen View)
     const memoriesGrid = document.querySelector('.memories-grid');
+    const imageModal = document.getElementById('image-modal');
+    const modalImageView = document.getElementById('modal-image-view');
+    const closeImageModal = document.getElementById('close-image-modal');
+
+    if (closeImageModal && imageModal) {
+        closeImageModal.addEventListener('click', () => imageModal.classList.add('hidden'));
+        imageModal.addEventListener('click', (e) => {
+            if (e.target === imageModal) imageModal.classList.add('hidden');
+        });
+    }
 
     const takeSelfieBtns = document.querySelectorAll('.random-selfie-card .primary-btn');
     takeSelfieBtns.forEach(btn => {
@@ -682,7 +692,11 @@ function initCloudApp(coupleCode) {
     const setupMemoryUploadTriggers = () => {
         const uploadTriggers = document.querySelectorAll('#open-add-memory-btn, #upload-device-photo-btn');
         uploadTriggers.forEach(btn => {
-            btn.addEventListener('click', () => {
+            // Prevent duplicate bindings
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+
+            newBtn.addEventListener('click', () => {
                 const memoryInput = document.createElement('input');
                 memoryInput.type = 'file';
                 memoryInput.accept = 'image/*';
@@ -717,20 +731,19 @@ function initCloudApp(coupleCode) {
                 cell.style.backgroundImage = `url(${mem.image})`;
                 cell.style.backgroundSize = 'cover';
                 cell.style.backgroundPosition = 'center';
+                cell.style.cursor = 'pointer';
+
+                // Open photo in full-screen modal when clicked
+                cell.addEventListener('click', () => {
+                    if (modalImageView && imageModal) {
+                        modalImageView.src = mem.image;
+                        imageModal.classList.remove('hidden');
+                    }
+                });
+
                 memoriesGrid.appendChild(cell);
             });
 
             setupMemoryUploadTriggers();
         });
     }
-}
-
-function calculateHaversine(lat1, lon1, lat2, lon2) {
-    const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    return Math.round(R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a))));
-}
