@@ -198,7 +198,18 @@ function initCloudApp(coupleCode) {
             if (target) target.classList.add('active');
         });
     });
-
+// Moments Subtabs Switching (Selfie vs Memories)
+    const subtabBtns = document.querySelectorAll('.subtab-btn');
+    const subtabPanes = document.querySelectorAll('.subtab-pane');
+    subtabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            subtabBtns.forEach(b => b.classList.remove('active'));
+            subtabPanes.forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            const targetPane = document.getElementById(`subtab-${btn.dataset.subtab}`);
+            if (targetPane) targetPane.classList.add('active');
+        });
+    });
     // --- A. Editable & Live Countdown Sync ---
     const countdownCard = document.querySelector('.countdown-card');
     const countdownDays = document.querySelector('.countdown-days');
