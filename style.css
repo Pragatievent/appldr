@@ -915,7 +915,9 @@ input:checked + .slider:before { transform: translateX(22px); }
 
 /* Dark Mode Styles */
 body.dark-mode {
-    background: #121212 !important;
+    --card-bg: #1e1e1e;
+    --input-bg: #2c2c2c;
+    --text-color: #f0f0f0;
 }
 
 body.dark-mode .app-container {
